@@ -1,0 +1,5 @@
+Data/__pycache__/
+Figure/__pycache__/
+GUIs/__pycache__/
+GUIs/images/*.png
+GUIs/*.ini 

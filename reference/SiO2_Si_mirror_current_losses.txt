@@ -1,0 +1,4 @@
+	Input media	Layer 1	Exit media
+s (mA/cm²)	15.27	0.0	27.8
+p (mA/cm²)	15.16	-0.0	27.91
+avg (mA/cm²)	15.22	0.0	27.85

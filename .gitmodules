@@ -1,0 +1,6 @@
+[submodule "tkWindget"]
+	path = tkWindget
+	url = ./tkWindget/
+[submodule "RW_data"]
+	path = RW_data
+	url = ./RW_data/
