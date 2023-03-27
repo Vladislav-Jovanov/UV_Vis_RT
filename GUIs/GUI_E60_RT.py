@@ -14,9 +14,9 @@ from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilen
 from RW_data.RW_files import Files_RW
 from Figure.Figure import FigureE60
 from Data.Process import Process_data
-from tkWindget.tkWindget import Rotate
+from tkWindget.tkWindget import Rotate, OnOffButton
 
-
+#ax.set_yscale('log')
 class container():
     pass
 
@@ -27,6 +27,12 @@ class GUI_E60():
         self.root.title("E60_data")
         self.init_variables()
         self.init_frames()
+        self.init_mainframe()
+        self.init_ctl_frame()
+        self.init_tl_frame()
+        self.init_ctr_frame()
+        self.init_tr_frame()
+        self.init_sideframe()
         try:
             tmp=Files_RW().check_E60_ini(self.scriptdir,self.ini_name,self.split)
             self.filedir=tmp.filedir
@@ -40,13 +46,6 @@ class GUI_E60():
             self.refdir='Documents'
             self.savedir='Documents'
             self.write_to_ini()
-        self.init_mainframe()
-        self.init_ctl_frame()
-        self.init_tl_frame()
-        self.init_ctr_frame()
-        self.init_tr_frame()
-        self.init_sideframe()
-        
         
     def init_variables(self):
         self.split=':='
@@ -63,13 +62,14 @@ class GUI_E60():
         self.raw.data=[]
         self.avgdata=container()
         self.listboxwidth=24
-        self.pressname=['ref','data','avg'] #only for the for loop and center top right frame
+        #self.pressname=['ref','data','avg'] #only for the for loop and center top right frame
+        self.pressnames=['ref','data','avg']
         self.flags=[0,0,0,0]#to know do we have all data
-        self.pressmarker=[]#for all press switches
-        self.pressimageson=[]#for all press switches
-        self.pressimagesoff=[]#for all press switches
-        self.pressbuttons=[]#for all press switches
-        
+        #self.pressmarker=[]#for all press switches
+        #self.pressimageson=[]#for all press switches
+        #self.pressimagesoff=[]#for all press switches
+        #self.pressbuttons=[]#for all press switches
+        self.pressbuttons={}
     
     def write_to_ini(self):
         write=[]
@@ -133,17 +133,21 @@ class GUI_E60():
         rowcount+=1
         tk.Button(self.sideframe, text="Open reference\ndata file", command=self.Get_ref_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
         
-        imagepath=os.path.join(self.scriptdir, 'images','use_off.png')
-        image = Image.open(imagepath)
-        self.pressimagesoff.append(ImageTk.PhotoImage(image))
-        imagepath=os.path.join(self.scriptdir, 'images','use_on.png')
-        image = Image.open(imagepath)
-        self.pressimageson.append(ImageTk.PhotoImage(image))
-        self.pressmarker.append(0)
+        #imagepath=os.path.join(self.scriptdir, 'images','use_off.png')
+        #image = Image.open(imagepath)
+        #self.pressimagesoff.append(ImageTk.PhotoImage(image))
+        #imagepath=os.path.join(self.scriptdir, 'images','use_on.png')
+        #image = Image.open(imagepath)
+        #self.pressimageson.append(ImageTk.PhotoImage(image))
+        #self.pressmarker.append(0)
         
-        self.pressbuttons.append(tk.Button(self.sideframe, image=self.pressimagesoff[-1], command=lambda lidx=3: self.press_switch(lidx)))
+        #self.pressbuttons.append(tk.Button(self.sideframe, image=self.pressimagesoff[-1], command=lambda lidx=3: self.press_switch(lidx)))
+        #self.pressbuttons[-1].grid(row=rowcount,column=2)
+        tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'use_{image}' for image in ['on.png','off.png']],command=self.plot_all)
+        #tmp.enable_press()
+        tmp.grid(row=rowcount,column=2)
+        self.pressbuttons['use']=tmp
         
-        self.pressbuttons[-1].grid(row=rowcount,column=2)
         rowcount+=1
         tk.Button(self.sideframe, text="Open \ndata file(s)", command=self.Get_raw_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
         tk.Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
@@ -194,37 +198,38 @@ class GUI_E60():
                 self.savedir=os.path.dirname(filename)
                 self.write_to_ini()
             
-    def turn_off_ref_switches(self):
-        if self.pressmarker[0]:
-            self.press_switch(0)
-        self.flags[0]=0
-        if self.pressmarker[3]:
-            self.press_switch(3)
-        self.flags[3]=0
-    
-    def turn_off_data_switches(self):
-        self.flags[1]=0
-        self.flags[2]=0
-        if self.pressmarker[1]:
-            self.press_switch(1)
-        if self.pressmarker[2]:
-            self.press_switch(2)
-        
-        
-        
-    
+#    def turn_off_ref_switches(self):
+#        if self.pressmarker[0]:
+#            self.press_switch(0)
+#        self.flags[0]=0
+#        if self.pressmarker[3]:
+#            self.press_switch(3)
+#        self.flags[3]=0
+#    def turn_off_data_switches(self):
+#        self.flags[1]=0
+#        self.flags[2]=0
+#        if self.pressmarker[1]:
+#            self.press_switch(1)
+#        if self.pressmarker[2]:
+#            self.press_switch(2)
     def process_reference_file(self,filename):
         tmp=Files_RW().load_reference_TMM(filename)
         if tmp.error!='':
             self.reffile.set('')
-            self.turn_off_ref_switches()
+            #self.turn_off_ref_switches()
+            self.pressbuttons['ref'].disable_press()
+            self.pressbuttons['use'].disable_press()
+            self.pressbuttons['ref'].change_state('off')
+            self.pressbuttons['use'].change_state('off')
             self.errormsg.set(tmp.error)
         else:
             self.reference=tmp
             self.reffile.set(os.path.basename(filename))
             Process_data().convert_units(self.reference)#converts into nm via mutuable property
-            self.flags[0]=1
-            self.flags[3]=1
+            self.pressbuttons['ref'].enable_press()
+            self.pressbuttons['use'].enable_press()
+            #self.flags[0]=1
+            #self.flags[3]=1
         
     def Get_ref_file(self):
         self.errormsg.set('')
@@ -250,7 +255,8 @@ class GUI_E60():
         if tmp.error!='':
             self.errormsg.set(tmp.error)
         elif not self.raw.data:
-            if tmp.type=='Reflectance' or tmp.type=='Transmittance': #I only allow loading of %R files
+            #if tmp.type=='Reflectance' or tmp.type=='Transmittance': #I only allow loading of %R files
+            if True: 
                 Process_data().convert_units(tmp)#converts into nm
                 self.raw.data.append(tmp)
                 self.raw.filename.append(filename)
@@ -270,7 +276,7 @@ class GUI_E60():
             
     def Get_raw_file(self):
         self.errormsg.set('')
-        tmp=askopenfilenames(title="Select raw reflectance data files.", initialdir=self.filedir, filetypes=[("E60 dsp files","*.dsp")])#openfilenames gives you a touple####
+        tmp=askopenfilenames(title="Select raw E60 data files.", initialdir=self.filedir, filetypes=[("E60 dsp files","*.dsp")])#openfilenames gives you a touple####
         if tmp:#to check if anything has been read out
             #change the folder where to look for the files
             for item in tmp:
@@ -285,8 +291,8 @@ class GUI_E60():
                 else:
                     self.errormsg.set('Some files not loaded.')
         if self.raw.data:
-            self.flags[1]=1
-            self.flags[2]=1
+            self.pressbuttons['avg'].enable_press()
+            self.pressbuttons['data'].enable_press()
         
         
     def Remove_loaded(self):
@@ -302,7 +308,10 @@ class GUI_E60():
             self.raw.filename.pop(item)
             self.raw.basename.pop(item)
         if not len(self.raw.data):
-            self.turn_off_data_switches()
+            self.pressbuttons['avg'].disable_press()
+            self.pressbuttons['data'].disable_press()
+            self.pressbuttons['avg'].change_state('off')
+            self.pressbuttons['data'].change_state('off')
         self.plot_all()
     
     def init_tl_frame(self):
@@ -314,8 +323,6 @@ class GUI_E60():
         self.movavg_list=[0,1,3,5,7]
         self.movavg=self.movavg_list[0]
         #self.movavg_choice=tk.IntVar()
-        
-        
         self.avg_num=Rotate(parent=self.ctl_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=tk.IntVar(),command=self.movavg_change)
         self.avg_num.grid(column=1,row=rowcount,columnspan=2)
         
@@ -345,28 +352,34 @@ class GUI_E60():
     def init_ctr_frame(self):
         rowcount=1
         columncount=1
-        for item in self.pressname:
-            self.pressmarker.append(0)
-            imagepath=os.path.join(self.scriptdir, 'images', item+'_off.png')
-            image = Image.open(imagepath)
-            self.pressimagesoff.append(ImageTk.PhotoImage(image))
-            imagepath=os.path.join(self.scriptdir, 'images', item+'_on.png')
-            image = Image.open(imagepath)
-            self.pressimageson.append(ImageTk.PhotoImage(image))
-            self.pressbuttons.append(tk.Button(self.ctr_frame,image=self.pressimagesoff[-1],command=lambda lidx=self.pressname.index(item): self.press_switch(lidx)))
-            self.pressbuttons[-1].grid(row=rowcount,column=columncount)
-            columncount+=1
+#        for item in self.pressname:
+#            self.pressmarker.append(0)
+#            imagepath=os.path.join(self.scriptdir, 'images', item+'_off.png')
+#            image = Image.open(imagepath)
+#            self.pressimagesoff.append(ImageTk.PhotoImage(image))
+#            imagepath=os.path.join(self.scriptdir, 'images', item+'_on.png')
+#            image = Image.open(imagepath)
+#            self.pressimageson.append(ImageTk.PhotoImage(image))
+#            self.pressbuttons.append(tk.Button(self.ctr_frame,image=self.pressimagesoff[-1],command=lambda lidx=self.pressname.index(item): self.press_switch(lidx)))
+#            self.pressbuttons[-1].grid(row=rowcount,column=columncount)
+#            columncount+=1
+        for idx,item in enumerate(self.pressnames):
+            tmp=OnOffButton(parent=self.ctr_frame,imagepath=os.path.join(self.scriptdir,'images'),images=[f'{self.pressnames[idx]}_{image}' for image in ['on.png','off.png']],command=self.plot_all)
+            #tmp.enable_press()
+            tmp.grid(row=rowcount,column=columncount+idx)
+            self.pressbuttons[item]=tmp
         
-    def press_switch(self,idx):
-        self.errormsg.set('')
-        if self.flags[idx] or self.pressmarker[idx]:
-            self.pressmarker[idx]=(self.pressmarker[idx]+1) % 2
-            if self.pressmarker[idx]:
-                self.pressbuttons[idx].config(image=self.pressimageson[idx])
-            else:
-                self.pressbuttons[idx].config(image=self.pressimagesoff[idx])
-        
-            self.plot_all()
+#    def press_switch(self,idx,item):
+#        #to be repaired
+#        self.errormsg.set('')
+#        if self.flags[idx] or self.pressmarker[idx]:
+#            self.pressmarker[idx]=(self.pressmarker[idx]+1) % 2
+#            if self.pressmarker[idx]:
+#                self.pressbuttons[idx].config(image=self.pressimageson[idx])
+#            else:
+#                self.pressbuttons[idx].config(image=self.pressimagesoff[idx])
+#        
+#            self.plot_all()
         
     def init_mainframe(self):
         rowcount=1
@@ -382,10 +395,12 @@ class GUI_E60():
         
         #it should be rewritten because you do not need separate functions in figure class
     def plot_all(self):
-        if self.flags[1]:
+        self.errormsg.set('')
+        #to be repaired
+        if len(self.raw.data):
             self.avgdata=Process_data().average_curves(self.raw.data)
             self.avgdata.data=Process_data().mov_average(self.avgdata.data,self.movavg)
-            if self.pressmarker[3]:#only for the reference last in the pressmarkers
+            if self.pressbuttons['use'].get_state()=='on':#only for the reference last in the pressmarkers
                 tmp=Process_data().absolute_reflectance(self.avgdata,self.reference)
                 self.avgdata.data=tmp.data
                 self.avgdata.wlength=tmp.wlength
@@ -395,31 +410,34 @@ class GUI_E60():
         
         self.figure.ax.set_prop_cycle(None)#resets the color cycle
         
-        xmin=1200
-        xmax=200
+        xmin=2000
+        xmax=100
         ymin=0
         ymax=103
-        for idx in range(0,len(self.pressname)):#only for center top right
-            if self.pressname[idx]=='ref' and self.pressmarker[idx] and self.flags[0]:
+        if self.raw.data:
+            if self.raw.data[-1].type == 'Absorbance':
+                ymax=1
+        for item in self.pressnames:#only for center top right
+            if item=='ref' and self.pressbuttons[item].get_state()=='on':
                 x=self.reference.wlength
                 y=self.reference.data
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
                 self.figure.ax.plot(x,100*y,'k')
-            if self.pressname[idx]=='data' and self.pressmarker[idx] and self.flags[1]:
+            if item=='data' and self.pressbuttons[item].get_state()=='on':
                 for item in self.raw.data:
                     x=item.wlength
                     y=item.data
                     xmin=min(min(x),xmin)
                     xmax=max(max(x),xmax)
                     self.figure.ax.plot(x,y)
-            if self.pressname[idx]=='avg' and self.pressmarker[idx] and self.flags[2]:
+            if item=='avg' and self.pressbuttons[item].get_state()=='on':
                 x=self.avgdata.wlength
                 y=self.avgdata.data
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
                 self.figure.ax.plot(x,y,'r')
-        if not sum(self.pressmarker) or xmin==1200 or xmax==200:
+        if xmin==2000 or xmax==100:
                 ymin=0
                 ymax=1
                 xmin=200
