@@ -273,7 +273,8 @@ class GUI_E60():
                 out=1
             #returns success
         return out
-            
+   
+         
     def Get_raw_file(self):
         self.errormsg.set('')
         tmp=askopenfilenames(title="Select raw E60 data files.", initialdir=self.filedir, filetypes=[("E60 dsp files","*.dsp")])#openfilenames gives you a touple####
