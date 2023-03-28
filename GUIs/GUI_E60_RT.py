@@ -62,13 +62,7 @@ class GUI_E60():
         self.raw.data=[]
         self.avgdata=container()
         self.listboxwidth=24
-        #self.pressname=['ref','data','avg'] #only for the for loop and center top right frame
         self.pressnames=['ref','data','avg']
-        self.flags=[0,0,0,0]#to know do we have all data
-        #self.pressmarker=[]#for all press switches
-        #self.pressimageson=[]#for all press switches
-        #self.pressimagesoff=[]#for all press switches
-        #self.pressbuttons=[]#for all press switches
         self.pressbuttons={}
     
     def write_to_ini(self):
@@ -133,18 +127,7 @@ class GUI_E60():
         rowcount+=1
         tk.Button(self.sideframe, text="Open reference\ndata file", command=self.Get_ref_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
         
-        #imagepath=os.path.join(self.scriptdir, 'images','use_off.png')
-        #image = Image.open(imagepath)
-        #self.pressimagesoff.append(ImageTk.PhotoImage(image))
-        #imagepath=os.path.join(self.scriptdir, 'images','use_on.png')
-        #image = Image.open(imagepath)
-        #self.pressimageson.append(ImageTk.PhotoImage(image))
-        #self.pressmarker.append(0)
-        
-        #self.pressbuttons.append(tk.Button(self.sideframe, image=self.pressimagesoff[-1], command=lambda lidx=3: self.press_switch(lidx)))
-        #self.pressbuttons[-1].grid(row=rowcount,column=2)
         tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'use_{image}' for image in ['on.png','off.png']],command=self.plot_all)
-        #tmp.enable_press()
         tmp.grid(row=rowcount,column=2)
         self.pressbuttons['use']=tmp
         
@@ -198,20 +181,6 @@ class GUI_E60():
                 self.savedir=os.path.dirname(filename)
                 self.write_to_ini()
             
-#    def turn_off_ref_switches(self):
-#        if self.pressmarker[0]:
-#            self.press_switch(0)
-#        self.flags[0]=0
-#        if self.pressmarker[3]:
-#            self.press_switch(3)
-#        self.flags[3]=0
-#    def turn_off_data_switches(self):
-#        self.flags[1]=0
-#        self.flags[2]=0
-#        if self.pressmarker[1]:
-#            self.press_switch(1)
-#        if self.pressmarker[2]:
-#            self.press_switch(2)
     def process_reference_file(self,filename):
         tmp=Files_RW().load_reference_TMM(filename)
         if tmp.error!='':
@@ -228,8 +197,6 @@ class GUI_E60():
             Process_data().convert_units(self.reference)#converts into nm via mutuable property
             self.pressbuttons['ref'].enable_press()
             self.pressbuttons['use'].enable_press()
-            #self.flags[0]=1
-            #self.flags[3]=1
         
     def Get_ref_file(self):
         self.errormsg.set('')
@@ -255,8 +222,7 @@ class GUI_E60():
         if tmp.error!='':
             self.errormsg.set(tmp.error)
         elif not self.raw.data:
-            #if tmp.type=='Reflectance' or tmp.type=='Transmittance': #I only allow loading of %R files
-            if True: 
+            if tmp.type in ['Reflectance','Transmittance','Absorbance']: #I only allow loading of %R files 
                 Process_data().convert_units(tmp)#converts into nm
                 self.raw.data.append(tmp)
                 self.raw.filename.append(filename)
@@ -323,26 +289,11 @@ class GUI_E60():
         rowcount=1
         self.movavg_list=[0,1,3,5,7]
         self.movavg=self.movavg_list[0]
-        #self.movavg_choice=tk.IntVar()
         self.avg_num=Rotate(parent=self.ctl_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=tk.IntVar(),command=self.movavg_change)
         self.avg_num.grid(column=1,row=rowcount,columnspan=2)
         
-        #self.movavg_choice.set(self.movavg_list[0])
-        
-        #imagepath=os.path.join(self.scriptdir, 'images', "button.png")
-        #image = Image.open(imagepath)
-        #self.buttonleft=ImageTk.PhotoImage(image)
-        #self.buttonright=ImageTk.PhotoImage(image.rotate(180))
-        #rowcount=1
-        #tk.Button(self.ctl_frame, image=self.buttonleft,command=lambda lidx=-1: self.movavg_change(lidx),bg='lightblue').grid(row=rowcount,column=1)
-        #tk.Button(self.ctl_frame, image=self.buttonright,command=lambda lidx=+1: self.movavg_change(lidx),bg='lightblue').grid(row=rowcount,column=3)
-        #tk.Label(self.ctl_frame, textvariable=self.movavg_choice, borderwidth=2,relief=tk.GROOVE, width=10).grid(row=rowcount,column=2)
-        
-        #now using moduo and lidx that only brings direction you can change it in TMM too
     def movavg_change(self,avg):
         self.errormsg.set('')
-        #idx=(self.movavg_list.index(int(self.movavg_choice.get()))+idx) % len(self.movavg_list)
-        #self.movavg_choice.set(self.movavg_list[idx])
         self.movavg=avg
         self.plot_all()
     
@@ -353,34 +304,10 @@ class GUI_E60():
     def init_ctr_frame(self):
         rowcount=1
         columncount=1
-#        for item in self.pressname:
-#            self.pressmarker.append(0)
-#            imagepath=os.path.join(self.scriptdir, 'images', item+'_off.png')
-#            image = Image.open(imagepath)
-#            self.pressimagesoff.append(ImageTk.PhotoImage(image))
-#            imagepath=os.path.join(self.scriptdir, 'images', item+'_on.png')
-#            image = Image.open(imagepath)
-#            self.pressimageson.append(ImageTk.PhotoImage(image))
-#            self.pressbuttons.append(tk.Button(self.ctr_frame,image=self.pressimagesoff[-1],command=lambda lidx=self.pressname.index(item): self.press_switch(lidx)))
-#            self.pressbuttons[-1].grid(row=rowcount,column=columncount)
-#            columncount+=1
         for idx,item in enumerate(self.pressnames):
             tmp=OnOffButton(parent=self.ctr_frame,imagepath=os.path.join(self.scriptdir,'images'),images=[f'{self.pressnames[idx]}_{image}' for image in ['on.png','off.png']],command=self.plot_all)
-            #tmp.enable_press()
             tmp.grid(row=rowcount,column=columncount+idx)
             self.pressbuttons[item]=tmp
-        
-#    def press_switch(self,idx,item):
-#        #to be repaired
-#        self.errormsg.set('')
-#        if self.flags[idx] or self.pressmarker[idx]:
-#            self.pressmarker[idx]=(self.pressmarker[idx]+1) % 2
-#            if self.pressmarker[idx]:
-#                self.pressbuttons[idx].config(image=self.pressimageson[idx])
-#            else:
-#                self.pressbuttons[idx].config(image=self.pressimagesoff[idx])
-#        
-#            self.plot_all()
         
     def init_mainframe(self):
         rowcount=1
@@ -397,7 +324,6 @@ class GUI_E60():
         #it should be rewritten because you do not need separate functions in figure class
     def plot_all(self):
         self.errormsg.set('')
-        #to be repaired
         if len(self.raw.data):
             self.avgdata=Process_data().average_curves(self.raw.data)
             self.avgdata.data=Process_data().mov_average(self.avgdata.data,self.movavg)
