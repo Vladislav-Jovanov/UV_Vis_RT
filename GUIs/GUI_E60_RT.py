@@ -6,7 +6,6 @@ Created on Wed May 18 16:19:18 2022
 @author: tzework
 """
 import numpy as np
-from PIL import Image, ImageTk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import os
