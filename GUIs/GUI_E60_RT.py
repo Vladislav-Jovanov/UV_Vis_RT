@@ -109,7 +109,7 @@ class GUI_E60():
         
         #for the display control
         self.ctr_frame=tk.Frame(self.rootframe)
-        self.ctr_frame.grid(column=2,row=1,sticky='W')
+        self.ctr_frame.grid(column=2,row=1)
         self.ctr_frame.columnconfigure(0, weight = 1)
         self.ctr_frame.rowconfigure(0, weight = 1)
         
@@ -135,6 +135,11 @@ class GUI_E60():
         tk.Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
         rowcount+=1
         tk.Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1,columnspan=2)
+        #tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'log_{image}' for image in ['on.png','off.png']],command=self.plot_all)
+        #tmp.enable_press()
+        #tmp.grid(row=rowcount,column=2)
+        #self.pressbuttons['log']=tmp
+        
         rowcount+=1
         tk.Label(self.sideframe, font='Courier',width=24,text='Reference data:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
         rowcount+=1
@@ -154,6 +159,7 @@ class GUI_E60():
         #now configure xscrollbar
         self.listbox.config(xscrollcommand = self.xscrollbar.set)
         self.xscrollbar.config(command = self.listbox.xview)
+    
     
     #IHTM type of file should be here
     #comment
@@ -280,31 +286,31 @@ class GUI_E60():
             self.pressbuttons['data'].change_state('off')
         self.plot_all()
     
-    def init_tl_frame(self):
+    def init_tr_frame(self):
         rowcount=1
-        tk.Label(self.tl_frame,font='Courier',width=20,text='Averaging points',background=None).grid(row=rowcount,column=1)
+        tk.Label(self.tr_frame,font='Courier',width=20,text='Averaging points',background=None).grid(row=rowcount,column=1)
         
-    def init_ctl_frame(self):
+    def init_ctr_frame(self):
         rowcount=1
         self.movavg_list=[0,1,3,5,7]
         self.movavg=self.movavg_list[0]
-        self.avg_num=Rotate(parent=self.ctl_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=tk.IntVar(),command=self.movavg_change)
-        self.avg_num.grid(column=1,row=rowcount,columnspan=2)
+        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=tk.IntVar(),command=self.movavg_change)
+        self.avg_num.grid(column=1,row=rowcount,sticky='WE')
         
     def movavg_change(self,avg):
         self.errormsg.set('')
         self.movavg=avg
         self.plot_all()
     
-    def init_tr_frame(self):
+    def init_tl_frame(self):
         rowcount=1
-        tk.Label(self.tr_frame,font='Courier',width=20,text='Control display',background=None).grid(row=rowcount,column=1)
+        tk.Label(self.tl_frame,font='Courier',width=20,text='Control display',background=None).grid(row=rowcount,column=1)
         
-    def init_ctr_frame(self):
+    def init_ctl_frame(self):
         rowcount=1
         columncount=1
         for idx,item in enumerate(self.pressnames):
-            tmp=OnOffButton(parent=self.ctr_frame,imagepath=os.path.join(self.scriptdir,'images'),images=[f'{self.pressnames[idx]}_{image}' for image in ['on.png','off.png']],command=self.plot_all)
+            tmp=OnOffButton(parent=self.ctl_frame,imagepath=os.path.join(self.scriptdir,'images'),images=[f'{self.pressnames[idx]}_{image}' for image in ['on.png','off.png']],command=self.plot_all)
             tmp.grid(row=rowcount,column=columncount+idx)
             self.pressbuttons[item]=tmp
         
@@ -335,7 +341,7 @@ class GUI_E60():
             self.figure.ax.lines[0].remove()#lines.pop() doesn't work any more check all interactive graphs
         
         self.figure.ax.set_prop_cycle(None)#resets the color cycle
-        
+        #flag=0
         xmin=2000
         xmax=100
         ymin=0
@@ -350,7 +356,9 @@ class GUI_E60():
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
                 self.figure.ax.plot(x,100*y,'k')
+                #flag=1
             if item=='data' and self.pressbuttons[item].get_state()=='on':
+                #flag=2
                 for item in self.raw.data:
                     x=item.wlength
                     y=item.data
@@ -358,6 +366,7 @@ class GUI_E60():
                     xmax=max(max(x),xmax)
                     self.figure.ax.plot(x,y)
             if item=='avg' and self.pressbuttons[item].get_state()=='on':
+                #flag=2
                 x=self.avgdata.wlength
                 y=self.avgdata.data
                 xmin=min(min(x),xmin)
@@ -375,7 +384,19 @@ class GUI_E60():
             else:
                 self.figure.ax.set_ylabel('(%)',fontsize=10, position=(0,0.5),labelpad=5)
                 
-                    
+        #if self.pressbuttons['log'].get_state()=='off':
+        #    self.figure.ax.set_yscale('linear')
+        #if self.pressbuttons['log'].get_state()=='on':
+        #    self.figure.ax.set_yscale('log')
+        #    if flag==2:
+        #        ymin=min(y)*1e-1
+        #    elif flag==1:
+        #        ymin=min(y)*1e2*1e-1
+        #    else:
+        #        ymin=1e-1
+        
         self.figure.ax.set_xlim(xmin,xmax)
         self.figure.ax.set_ylim(ymin,ymax)
+        
+        
         self.canvas.draw()    
