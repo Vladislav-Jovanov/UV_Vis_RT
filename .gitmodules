@@ -5,5 +5,5 @@
 	path = RW_data
 	url = ../common/RW_data/
 [submodule "AppHub"]
-        path = AppHub
+	path = AppHub
 	url = ../common/AppHub/
