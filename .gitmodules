@@ -1,6 +1,9 @@
 [submodule "tkWindget"]
 	path = tkWindget
-	url = /home/tze/Documents/Programming/python/common/tkWindget/
+	url = ../common/tkWindget/
 [submodule "RW_data"]
 	path = RW_data
-	url = /home/tze/Documents/Programming/python/common/RW_data/
+	url = ../common/RW_data/
+[submodule "AppHub"]
+	path = AppHub
+	url = ../common/AppHub/
