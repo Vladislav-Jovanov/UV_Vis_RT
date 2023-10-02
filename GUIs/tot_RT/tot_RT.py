@@ -19,11 +19,11 @@ from tkWindget.tkWindget import Rotate, OnOffButton
 class container():
     pass
 
-class GUI_E60():
+class E60_tot_RT():
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry("900x480")
-        self.root.title("E60_data")
+        self.root.title("E60_data_process")
         self.init_variables()
         self.init_frames()
         self.init_mainframe()
@@ -121,6 +121,7 @@ class GUI_E60():
         pass
     
     def init_sideframe(self):
+        print("I am here")
         rowcount=1
         tk.Label(self.sideframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,columnspan=2)
         rowcount+=1
