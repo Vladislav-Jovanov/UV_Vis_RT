@@ -121,7 +121,6 @@ class E60_tot_RT():
         pass
     
     def init_sideframe(self):
-        print("I am here")
         rowcount=1
         tk.Label(self.sideframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,columnspan=2)
         rowcount+=1
