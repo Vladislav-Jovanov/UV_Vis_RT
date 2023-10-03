@@ -6,24 +6,22 @@ Created on Wed May 18 16:19:18 2022
 @author: tzework
 """
 import numpy as np
-import tkinter as tk
+from tkinter import Frame, Tk, Button, Label, SUNKEN, StringVar, IntVar, Scrollbar, Listbox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import os
 from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
 from RW_data.RW_files import Files_RW
 from Figure.Figure import FigureE60
 from Data.Process import Process_data
-from tkWindget.tkWindget import Rotate, OnOffButton
+from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame
 
 #ax.set_yscale('log')
 class container():
     pass
 
-class E60_tot_RT():
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.geometry("900x480")
-        self.root.title("E60_data_process")
+class E60_tot_RT(AppFrame):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs,appgeometry=(900, 540, 25, 25))
         self.init_variables()
         self.init_frames()
         self.init_mainframe()
@@ -45,14 +43,18 @@ class E60_tot_RT():
             self.refdir='Documents'
             self.savedir='Documents'
             self.write_to_ini()
+    
+    def __str__(self):
+        return 'E60_data_process'
+    
         
     def init_variables(self):
         self.split=':='
         self.scriptdir=os.path.dirname(__file__)#path of this __file__ not the __main__
         self.ini_name=os.path.basename(__file__).replace(os.path.basename(__file__).split('.')[-1],'ini')
-        self.reffile=tk.StringVar()
+        self.reffile=StringVar()
         self.reffile.set('')
-        self.errormsg=tk.StringVar()
+        self.errormsg=StringVar()
         self.errormsg.set('')#to display messages
         self.figure=FigureE60()
         self.raw=container()
@@ -74,85 +76,81 @@ class E60_tot_RT():
         Files_RW().write_to_file(self.scriptdir,self.ini_name,write)
         
     def init_frames(self):    
-        self.rootframe=tk.Frame(self.root)
+        self.rootframe=Frame(self.root)
         self.rootframe.pack(pady = (25,25), padx = (25,25))
         #for the buttons and file list
-        self.sideframe = tk.Frame(self.rootframe)
+        self.sideframe = Frame(self.rootframe)
         self.sideframe.grid(column=0,row=0,rowspan=3)
         self.sideframe.columnconfigure(0, weight = 1)
         self.sideframe.rowconfigure(0, weight = 1)
         
         #for the label text avg points
-        self.tl_frame=tk.Frame(self.rootframe)
+        self.tl_frame=Frame(self.rootframe)
         self.tl_frame.grid(column=1,row=0)
         self.tl_frame.columnconfigure(0, weight = 1)
         self.tl_frame.rowconfigure(0, weight = 1)
         
         #for the label text what to show
-        self.tr_frame=tk.Frame(self.rootframe)
+        self.tr_frame=Frame(self.rootframe)
         self.tr_frame.grid(column=2,row=0,sticky='W')
         self.tr_frame.columnconfigure(0, weight = 1)
         self.tr_frame.rowconfigure(0, weight = 1)
         
         #for the graph and toolbar
-        self.mainframe = tk.Frame(self.rootframe)
+        self.mainframe = Frame(self.rootframe)
         #self.mainframe.pack(pady = (50,50), padx = (50,50))
         self.mainframe.grid(column=1,row=2, columnspan=2)
         self.mainframe.columnconfigure(0, weight = 1)
         self.mainframe.rowconfigure(0, weight = 1)
         
         #for the avg points control
-        self.ctl_frame=tk.Frame(self.rootframe)
+        self.ctl_frame=Frame(self.rootframe)
         self.ctl_frame.grid(column=1,row=1)
         self.ctl_frame.columnconfigure(0, weight = 1)
         self.ctl_frame.rowconfigure(0, weight = 1)
         
         #for the display control
-        self.ctr_frame=tk.Frame(self.rootframe)
+        self.ctr_frame=Frame(self.rootframe)
         self.ctr_frame.grid(column=2,row=1)
         self.ctr_frame.columnconfigure(0, weight = 1)
         self.ctr_frame.rowconfigure(0, weight = 1)
-        
-        
-    def init_start(self):
-        self.root.mainloop()
         
     def placeholder(self):
         pass
     
     def init_sideframe(self):
         rowcount=1
-        tk.Label(self.sideframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,columnspan=2)
+        Label(self.sideframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,columnspan=2)
         rowcount+=1
-        tk.Button(self.sideframe, text="Open reference\ndata file", command=self.Get_ref_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
+        Button(self.sideframe, text="Open reference\ndata file", command=self.Get_ref_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
         
         tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'use_{image}' for image in ['on.png','off.png']],command=self.plot_all)
         tmp.grid(row=rowcount,column=2)
         self.pressbuttons['use']=tmp
         
         rowcount+=1
-        tk.Button(self.sideframe, text="Open \ndata file(s)", command=self.Get_raw_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
-        tk.Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
+        Button(self.sideframe, text="Open \ndata file(s)", command=self.Get_raw_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
+        Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
         rowcount+=1
-        tk.Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1,columnspan=2)
+        Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1,columnspan=2)
         #tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'log_{image}' for image in ['on.png','off.png']],command=self.plot_all)
         #tmp.enable_press()
         #tmp.grid(row=rowcount,column=2)
         #self.pressbuttons['log']=tmp
         
         rowcount+=1
-        tk.Label(self.sideframe, font='Courier',width=24,text='Reference data:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
+        Label(self.sideframe, font='Courier',width=24,text='Reference data:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
         rowcount+=1
-        tk.Label(self.sideframe, font='Courier',width=24, wraplength=240,justify='left',relief=tk.SUNKEN, textvariable=self.reffile,anchor='w').grid(row=rowcount,column=1,columnspan=2)
+        Label(self.sideframe, font='Courier',width=24, wraplength=240,justify='left',relief=SUNKEN, textvariable=self.reffile,anchor='w').grid(row=rowcount,column=1,columnspan=2)
         rowcount+=1
-        tk.Label(self.sideframe, font='Courier',width=24,text='Loaded files:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
+        Label(self.sideframe, font='Courier',width=24,text='Loaded files:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
         rowcount+=1
-        self.xscrollbar=tk.Scrollbar(self.sideframe,orient='horizontal')
+        self.xscrollbar=Scrollbar(self.sideframe,orient='horizontal')
         self.xscrollbar.grid(row = rowcount, column = 1, columnspan=2, sticky='EW')
         rowcount+=1
-        self.listbox=tk.Listbox(self.sideframe, font='Courier', selectbackground='red', selectmode='extended',width=24, height=7)
+        self.listbox=Listbox(self.sideframe, font='Courier', selectbackground='red', selectmode='extended',width=24, height=7)
         self.listbox.grid(row = rowcount, column = 1,columnspan=2,rowspan=5)
-        self.scrollbar=tk.Scrollbar(self.sideframe)
+        self.scrollbar=Scrollbar(self.sideframe)
         self.scrollbar.grid(row = rowcount, column = 3, rowspan=5, sticky='NS')
         self.listbox.config(yscrollcommand = self.scrollbar.set)
         self.scrollbar.config(command = self.listbox.yview)
@@ -288,13 +286,13 @@ class E60_tot_RT():
     
     def init_tr_frame(self):
         rowcount=1
-        tk.Label(self.tr_frame,font='Courier',width=20,text='Averaging points',background=None).grid(row=rowcount,column=1)
+        Label(self.tr_frame,font='Courier',width=20,text='Averaging points',background=None).grid(row=rowcount,column=1)
         
     def init_ctr_frame(self):
         rowcount=1
         self.movavg_list=[0,1,3,5,7]
         self.movavg=self.movavg_list[0]
-        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=tk.IntVar(),command=self.movavg_change)
+        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar(),command=self.movavg_change)
         self.avg_num.grid(column=1,row=rowcount,sticky='WE')
         
     def movavg_change(self,avg):
@@ -304,7 +302,7 @@ class E60_tot_RT():
     
     def init_tl_frame(self):
         rowcount=1
-        tk.Label(self.tl_frame,font='Courier',width=20,text='Control display',background=None).grid(row=rowcount,column=1)
+        Label(self.tl_frame,font='Courier',width=20,text='Control display',background=None).grid(row=rowcount,column=1)
         
     def init_ctl_frame(self):
         rowcount=1
