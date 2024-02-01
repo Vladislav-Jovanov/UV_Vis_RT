@@ -1,9 +1,9 @@
 [submodule "tkWindget"]
 	path = tkWindget
-	url = ../common/tkWindget/
+	url = git@github.com:Killberos-Tze/tkWindget.git
 [submodule "RW_data"]
 	path = RW_data
-	url = ../common/RW_data/
+	url = git@github.com:Killberos-Tze/RW_data.git
 [submodule "AppHub"]
 	path = AppHub
-	url = ../common/AppHub/
+	url = git@github.com:Killberos-Tze/AppHub.git
