@@ -76,41 +76,39 @@ class E60_tot_RT(AppFrame):
         Files_RW().write_to_file(self.scriptdir,self.ini_name,write)
         
     def init_frames(self):    
-        self.rootframe=Frame(self.root)
-        self.rootframe.pack(pady = (25,25), padx = (25,25))
         #for the buttons and file list
-        self.sideframe = Frame(self.rootframe)
+        self.sideframe = Frame(self.frameroot)
         self.sideframe.grid(column=0,row=0,rowspan=3)
         self.sideframe.columnconfigure(0, weight = 1)
         self.sideframe.rowconfigure(0, weight = 1)
         
         #for the label text avg points
-        self.tl_frame=Frame(self.rootframe)
+        self.tl_frame=Frame(self.frameroot)
         self.tl_frame.grid(column=1,row=0)
         self.tl_frame.columnconfigure(0, weight = 1)
         self.tl_frame.rowconfigure(0, weight = 1)
         
         #for the label text what to show
-        self.tr_frame=Frame(self.rootframe)
+        self.tr_frame=Frame(self.frameroot)
         self.tr_frame.grid(column=2,row=0,sticky='W')
         self.tr_frame.columnconfigure(0, weight = 1)
         self.tr_frame.rowconfigure(0, weight = 1)
         
         #for the graph and toolbar
-        self.mainframe = Frame(self.rootframe)
+        self.mainframe = Frame(self.frameroot)
         #self.mainframe.pack(pady = (50,50), padx = (50,50))
         self.mainframe.grid(column=1,row=2, columnspan=2)
         self.mainframe.columnconfigure(0, weight = 1)
         self.mainframe.rowconfigure(0, weight = 1)
         
         #for the avg points control
-        self.ctl_frame=Frame(self.rootframe)
+        self.ctl_frame=Frame(self.frameroot)
         self.ctl_frame.grid(column=1,row=1)
         self.ctl_frame.columnconfigure(0, weight = 1)
         self.ctl_frame.rowconfigure(0, weight = 1)
         
         #for the display control
-        self.ctr_frame=Frame(self.rootframe)
+        self.ctr_frame=Frame(self.frameroot)
         self.ctr_frame.grid(column=2,row=1)
         self.ctr_frame.columnconfigure(0, weight = 1)
         self.ctr_frame.rowconfigure(0, weight = 1)
@@ -292,7 +290,7 @@ class E60_tot_RT(AppFrame):
         rowcount=1
         self.movavg_list=[0,1,3,5,7]
         self.movavg=self.movavg_list[0]
-        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar(),command=self.movavg_change)
+        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar,command=self.movavg_change)
         self.avg_num.grid(column=1,row=rowcount,sticky='WE')
         
     def movavg_change(self,avg):
