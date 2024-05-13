@@ -176,7 +176,7 @@ class E60_tot_RT(AppFrame):
             data=np.append(self.avgdata.wlength[:,np.newaxis],self.avgdata.data[:,np.newaxis],axis=1)
             fmtlist=['%s','%.6e']
             init_file=os.path.splitext(self.raw.basename[0])[0]
-            filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=init_file)
+            filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=f'{init_file}.dtsp')
             if filename:
                 Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
                 self.savedir=os.path.dirname(filename)

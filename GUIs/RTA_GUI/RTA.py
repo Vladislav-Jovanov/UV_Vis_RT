@@ -23,7 +23,7 @@ class Test_GUI():
         self.frameroot=Frame(self.approot)
         self.frameroot.pack(pady = (25,25), padx = (25,25))
         self.plot=TMMfigure()
-        sample='Au_60s_300C_Ti-strana'
+        sample='PDMS_2.5-TiO2'
         filedir='/home/tze/Documents/'
         filenameT=f'{sample}_T01.dtsp'
         filenameR=f'{sample}_R01.dtsp'
@@ -82,7 +82,7 @@ class Test_GUI():
         Files_RW().write_header_data(filedir,f'{sample}_A.dtsp',header,data,fmtlist)
         
     def init_start(self):
-        self.root.mainloop()
+        self.approot.mainloop()
         
 if __name__=='__main__':
     Test_GUI().init_start()
