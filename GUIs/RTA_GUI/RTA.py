@@ -9,19 +9,15 @@ Created on Tue Mar 14 15:00:13 2023
 from RW_data.RW_files import Files_RW
 from Figs.figClass import TMMfigure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from tkinter import Frame, Tk
+from tkWindget.tkWindget import AppFrame
 import numpy as np
 import os
 
 
 
-class Test_GUI():
-    def __init__(self):
-        self.approot = Tk()
-        self.approot.geometry("600x900")
-        self.approot.title("Windgets to see")
-        self.frameroot=Frame(self.approot)
-        self.frameroot.pack(pady = (25,25), padx = (25,25))
+class calc_A(AppFrame):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs,appgeometry=(900, 540, 25, 25))
         self.plot=TMMfigure()
         sample='PDMS_2.5-TiO2'
         filedir='/home/tze/Documents/'
@@ -80,9 +76,10 @@ class Test_GUI():
         data=np.append(tmpT.wlength[:,np.newaxis],tmpA[:,np.newaxis],axis=1)
         fmtlist=['%s','%.6e']
         Files_RW().write_header_data(filedir,f'{sample}_A.dtsp',header,data,fmtlist)
-        
-    def init_start(self):
-        self.approot.mainloop()
+    
+    def __str__(self):
+        return 'Total A calculation'
+    
         
 if __name__=='__main__':
     Test_GUI().init_start()

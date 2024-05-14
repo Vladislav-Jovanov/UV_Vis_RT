@@ -35,7 +35,7 @@ class plot_RTA(AppFrame):
             self.write_to_ini()
     
     def __str__(self):
-        return 'E60_data_process'
+        return 'Graph plotting'
     
         
     def init_variables(self):
