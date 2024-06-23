@@ -45,3 +45,29 @@ class FigureE60():
             axes.set_xlabel(string,fontsize=10, position=(0.5,0),labelpad=5)
         elif label=='y_label':
             axes.set_ylabel(string,fontsize=10, position=(0,0.5),labelpad=5)
+            
+            
+class Figure_top_bottom(Figure):
+    def __init__(self):
+        #matplotlib muliplies axes size with large figure size that is why you always divide with large figure size
+        super().__init__()
+        xdim=9.5
+        ydim=14
+        axx=7
+        axy=5
+        axx0=1.5
+        axy0=1.5
+        spacing=1.5
+        
+        self.set_size_inches((xdim/2.54,ydim/2.54))
+        self.axb=self.add_axes((axx0/xdim,axy0/ydim,axx/xdim,axy/ydim))
+        self.axb.tick_params(labelsize=8)
+        self.axb.set_xlabel('wavelength (nm)',fontsize=10, position=(0.5,0),labelpad=5)
+        self.axb.set_ylabel('Absorbance (%)',fontsize=10,  position=(0,0.5),labelpad=5)
+        
+                               
+        self.axt=self.add_axes([axx0/xdim,(axy0+axy+spacing)/ydim,axx/xdim,axy/ydim])
+        self.axt.tick_params(labelsize=8)
+        self.axt.set_xlabel('wavelength (nm)',fontsize=10, position=(0.5,0),labelpad=5)
+        self.axt.set_ylabel('All contributions (%)',fontsize=10,  position=(0,0.5),labelpad=5)
+        #self.axt.legend(['1-R','T'],loc='upper right',bbox_to_anchor=(1.1, 1.15),framealpha=0.5)

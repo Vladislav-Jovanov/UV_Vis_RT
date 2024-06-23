@@ -1,7 +1,3 @@
-fix refrence file loading
-make read ihtm file function
-make process header, comment, data functions. use iv data analysis
-make display application
 read data from vinca
 change tmm so that the output files are with extension tmm
 change tmm so that output files match ihtm formatting
