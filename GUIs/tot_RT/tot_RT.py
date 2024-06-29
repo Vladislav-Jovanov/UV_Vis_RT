@@ -7,13 +7,12 @@ Created on Wed May 18 16:19:18 2022
 """
 import numpy as np
 from tkinter import Frame, Tk, Button, Label, SUNKEN, StringVar, IntVar, Scrollbar, Listbox
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import os
 from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
 from RW_data.RW_files import Files_RW
 from Figure.Figure import FigureE60
 from Data.Process import Process_data
-from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame
+from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame, FigureFrame
 
 #ax.set_yscale('log')
 class container():
@@ -56,7 +55,6 @@ class E60_tot_RT(AppFrame):
         self.reffile.set('')
         self.errormsg=StringVar()
         self.errormsg.set('')#to display messages
-        self.figure=FigureE60()
         self.raw=container()
         self.raw.filename=[]
         self.raw.basename=[]
@@ -311,17 +309,9 @@ class E60_tot_RT(AppFrame):
             self.pressbuttons[item]=tmp
         
     def init_mainframe(self):
-        rowcount=1
-                
-        self.canvas=FigureCanvasTkAgg(self.figure.fig,master=self.mainframe)
-        self.canvas.get_tk_widget().grid(row=rowcount,column=1, columnspan=7)
-        self.canvas.draw()
-        
-        rowcount+=1
-        toolbar = NavigationToolbar2Tk(self.canvas, self.mainframe, pack_toolbar=False)
-        toolbar.update()
-        toolbar.grid(row=rowcount,column=1,columnspan=7)
-        
+        self.figure=FigureFrame(parent=self.mainframe,figclass=FigureE60)
+        self.figure.grid(row=1,column=1)
+    
         #it should be rewritten because you do not need separate functions in figure class
     def plot_all(self):
         self.errormsg.set('')
@@ -333,10 +323,10 @@ class E60_tot_RT(AppFrame):
                 self.avgdata.data=tmp.data
                 self.avgdata.wlength=tmp.wlength
         
-        while len(self.figure.ax.lines):
-            self.figure.ax.lines[0].remove()#lines.pop() doesn't work any more check all interactive graphs
+        while len(self.figure.plot.ax.lines):
+            self.figure.plot.ax.lines[0].remove()#lines.pop() doesn't work any more check all interactive graphs
         
-        self.figure.ax.set_prop_cycle(None)#resets the color cycle
+        self.figure.plot.ax.set_prop_cycle(None)#resets the color cycle
         #flag=0
         xmin=2000
         xmax=100
@@ -351,7 +341,7 @@ class E60_tot_RT(AppFrame):
                 y=self.reference.data
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
-                self.figure.ax.plot(x,100*y,'k')
+                self.figure.plot.ax.plot(x,100*y,'k')
                 #flag=1
             if item=='data' and self.pressbuttons[item].get_state()=='on':
                 #flag=2
@@ -360,25 +350,25 @@ class E60_tot_RT(AppFrame):
                     y=item.data
                     xmin=min(min(x),xmin)
                     xmax=max(max(x),xmax)
-                    self.figure.ax.plot(x,y)
+                    self.figure.plot.ax.plot(x,y)
             if item=='avg' and self.pressbuttons[item].get_state()=='on':
                 #flag=2
                 x=self.avgdata.wlength
                 y=self.avgdata.data
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
-                self.figure.ax.plot(x,y,'r')
+                self.figure.plot.ax.plot(x,y,'r')
         if xmin==2000 or xmax==100:
                 ymin=0
                 ymax=1
                 xmin=200
                 xmax=1200
-                self.figure.ax.set_ylabel('',fontsize=10, position=(0,0.5),labelpad=5)
+                self.figure.plot.ax.set_ylabel('',fontsize=10, position=(0,0.5),labelpad=5)
         else:
             if len(self.raw.data):
-                self.figure.ax.set_ylabel(f'{self.raw.data[-1].type} ({self.raw.data[-1].data_units})',fontsize=10, position=(0,0.5),labelpad=5)
+                self.figure.plot.ax.set_ylabel(f'{self.raw.data[-1].type} ({self.raw.data[-1].data_units})',fontsize=10, position=(0,0.5),labelpad=5)
             else:
-                self.figure.ax.set_ylabel('(%)',fontsize=10, position=(0,0.5),labelpad=5)
+                self.figure.plot.ax.set_ylabel('(%)',fontsize=10, position=(0,0.5),labelpad=5)
                 
         #if self.pressbuttons['log'].get_state()=='off':
         #    self.figure.ax.set_yscale('linear')
@@ -391,8 +381,8 @@ class E60_tot_RT(AppFrame):
         #    else:
         #        ymin=1e-1
         
-        self.figure.ax.set_xlim(xmin,xmax)
-        self.figure.ax.set_ylim(ymin,ymax)
+        self.figure.plot.ax.set_xlim(xmin,xmax)
+        self.figure.plot.ax.set_ylim(ymin,ymax)
         
         
-        self.canvas.draw()    
+        self.figure.canvas.draw()    

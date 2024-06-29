@@ -12,7 +12,7 @@ from tkinter.filedialog import askopenfilenames
 from RW_data.RW_files import Files_RW
 from Figure.Figure import FigureE60
 from Data.Process import Process_data
-from tkWindget.tkWindget import AppFrame, Rotate, OnOffButton
+from tkWindget.tkWindget import AppFrame, Rotate, OnOffButton, FigureFrame
 
 #ax.set_yscale('log')
 class container():
@@ -44,7 +44,6 @@ class plot_RTA(AppFrame):
         self.ini_name=os.path.basename(__file__).replace(os.path.basename(__file__).split('.')[-1],'ini')
         self.errormsg=StringVar()
         self.errormsg.set('')#to display messages
-        self.figure=FigureE60()
         self.raw=container()
         self.raw.filename=[]
         self.raw.basename=[]
@@ -192,26 +191,18 @@ class plot_RTA(AppFrame):
         
         
     def init_mainframe(self):
-        rowcount=1
-                
-        self.canvas=FigureCanvasTkAgg(self.figure.fig,master=self.mainframe)
-        self.canvas.get_tk_widget().grid(row=rowcount,column=1)
-        self.canvas.draw()
-        
-        rowcount+=1
-        toolbar = NavigationToolbar2Tk(self.canvas, self.mainframe, pack_toolbar=False)
-        toolbar.update()
-        toolbar.grid(row=rowcount,column=1)
+        self.figure=FigureFrame(parent=self.mainframe,figclass=FigureE60)
+        self.figure.grid(row=1,column=1)
         
     def init_tlmain(self):
         Label(self.tlmain,text='Resize the y-scale:  ').grid(column=0,row=0,sticky='W')
         self.y_scale=Rotate(parent=self.tlmain,direction='horizontal',width=5,choice_list=[100,150,200,250,300,50],typevar=IntVar,command=self.change_scale)
         self.y_scale.grid(column=1, row=0, sticky='E')
-        self.figure.ax.set_ylim(0,self.y_scale.choice.get()+3)
+        self.figure.plot.ax.set_ylim(0,self.y_scale.choice.get()+3)
         
     def change_scale(self,val):
-        self.figure.ax.set_ylim(0,val+3)
-        self.canvas.draw()
+        self.figure.plot.ax.set_ylim(0,val+3)
+        self.figure.canvas.draw()
         
     def init_trmain(self):
         self.legend=OnOffButton(parent=self.trmain,imagepath=os.path.join(self.scriptdir,'images'),images=[f'leg_{image}' for image in ['on.png','off.png']],command=self.update_legend)
@@ -220,22 +211,22 @@ class plot_RTA(AppFrame):
         
     def change_legend(self):
         if self.legend.get_state()=="on":
-            self.figure.ax.legend(self.raw.basename,loc='lower right')
+            self.figure.plot.ax.legend(self.raw.basename,loc='lower right')
         else:
-            if self.figure.ax.get_legend():
-                self.figure.ax.get_legend().remove()
+            if self.figure.plot.ax.get_legend():
+                self.figure.plot.ax.get_legend().remove()
     
     def update_legend(self):
         self.change_legend()
-        self.canvas.draw()
+        self.figure.canvas.draw()
     
     def plot_all(self):
         self.errormsg.set('')
         
-        while len(self.figure.ax.lines):
-            self.figure.ax.lines[0].remove()#lines.pop() doesn't work any more check all interactive graphs
+        while len(self.figure.plot.ax.lines):
+            self.figure.plot.ax.lines[0].remove()#lines.pop() doesn't work any more check all interactive graphs
         
-        self.figure.ax.set_prop_cycle(None)#resets the color cycle
+        self.figure.plot.ax.set_prop_cycle(None)#resets the color cycle
         #flag=0
         xmin=2000
         xmax=100
@@ -246,20 +237,20 @@ class plot_RTA(AppFrame):
                 y=item.data
                 xmin=min(min(x),xmin)
                 xmax=max(max(x),xmax)
-                self.figure.ax.plot(x,y)
-            self.figure.ax.set_ylabel(f'{self.raw.data[-1].type} ({self.raw.data[-1].data_units})',fontsize=10, position=(0,0.5),labelpad=5)
+                self.figure.plot.ax.plot(x,y)
+            self.figure.plot.ax.set_ylabel(f'{self.raw.data[-1].type} ({self.raw.data[-1].data_units})',fontsize=10, position=(0,0.5),labelpad=5)
             self.change_legend()
         else:
             if xmin==2000 or xmax==100:
                 xmin=200
                 xmax=1200
-            self.figure.ax.set_ylabel('',fontsize=10, position=(0,0.5),labelpad=5)
-            if self.figure.ax.get_legend():
-                self.figure.ax.get_legend().remove()    
+            self.figure.plot.ax.set_ylabel('',fontsize=10, position=(0,0.5),labelpad=5)
+            if self.figure.plot.ax.get_legend():
+                self.figure.plot.ax.get_legend().remove()    
                 
         
-        self.figure.ax.set_xlim(xmin,xmax)
-        self.figure.ax.set_ylim(0,self.y_scale.choice.get()+3)
+        self.figure.plot.ax.set_xlim(xmin,xmax)
+        self.figure.plot.ax.set_ylim(0,self.y_scale.choice.get()+3)
         
         
-        self.canvas.draw()    
+        self.figure.canvas.draw()    
