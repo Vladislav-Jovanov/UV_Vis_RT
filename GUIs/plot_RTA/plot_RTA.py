@@ -6,7 +6,6 @@ Created on Wed May 18 16:19:18 2022
 @author: tzework
 """
 from tkinter import Frame, Button, Label, StringVar, Scrollbar, Listbox, IntVar
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import os
 from tkinter.filedialog import askopenfilenames
 from RW_data.RW_files import Files_RW
