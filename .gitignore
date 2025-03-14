@@ -1,6 +1,3 @@
-#Data/__pycache__/
-#Figure/__pycache__/
-#GUIs/__pycache__/
 **/__pycache__/
-**/images/*.png
+#**/images/*.png
 **/*.ini 
