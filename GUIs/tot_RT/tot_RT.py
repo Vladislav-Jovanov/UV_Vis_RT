@@ -128,7 +128,8 @@ class E60_tot_RT(AppFrame):
         Button(self.sideframe, text="Open \ndata file(s)", command=self.Get_raw_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
         Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
         rowcount+=1
-        Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1,columnspan=2)
+        Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1)
+        Button(self.sideframe, text="Save\n1-R", command=self.save_one_data,width=12,bg='lightgray').grid(row=rowcount,column=2)
         #tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'log_{image}' for image in ['on.png','off.png']],command=self.plot_all)
         #tmp.enable_press()
         #tmp.grid(row=rowcount,column=2)
@@ -174,6 +175,27 @@ class E60_tot_RT(AppFrame):
             data=np.append(self.avgdata.wlength[:,np.newaxis],self.avgdata.data[:,np.newaxis],axis=1)
             fmtlist=['%s','%.6e']
             init_file=os.path.splitext(self.raw.basename[0])[0]
+            filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=f'{init_file}.dtsp')
+            if filename:
+                Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
+                self.savedir=os.path.dirname(filename)
+                self.write_to_ini()
+    
+    def save_one_data(self):
+        if self.raw.data and self.raw.data[0].type=="Reflectance":
+            header=[]
+            text='#data_header'
+            header.append(text)
+            text='wavelength\t'+'1-R_abs'
+            header.append(text)
+            text='nm\t%'
+            header.append(text)
+            text='#data_table'
+            header.append(text)
+            data=np.append(self.avgdata.wlength[:,np.newaxis],100-self.avgdata.data[:,np.newaxis],axis=1)
+            fmtlist=['%s','%.6e']
+            init_file=os.path.splitext(self.raw.basename[0])[0]
+            init_file=init_file.replace("_R","_1-R")
             filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=f'{init_file}.dtsp')
             if filename:
                 Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
