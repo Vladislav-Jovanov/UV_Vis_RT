@@ -162,7 +162,15 @@ class E60_tot_RT(AppFrame):
     #data_header
     #data_table
     def save_data(self):
+        self.errormsg.set("")
         if self.raw.data:
+            if (self.raw.data[0].type=="Reflectance" and self.pressbuttons['use'].get_state()=="off"):
+                self.errormsg.set("Turn on the reference!")
+                return
+            if (self.raw.data[0].type in ["Transmittance","Absorbance"] and self.pressbuttons['use'].get_state()=="on"):
+                self.errormsg.set("Turn off the reference!")
+                return
+            
             header=[]
             text='#data_header'
             header.append(text)
@@ -182,7 +190,14 @@ class E60_tot_RT(AppFrame):
                 self.write_to_ini()
     
     def save_one_data(self):
-        if self.raw.data and self.raw.data[0].type=="Reflectance":
+        self.errormsg.set("")
+        if self.raw.data:
+            if (self.raw.data[0].type=="Reflectance" and self.pressbuttons['use'].get_state()=="off"):
+                self.errormsg.set("Turn on the reference!")
+                return
+            if self.raw.data[0].type in ["Transmittance","Absorbance"]:
+                self.errormsg.set("Only 1-R!")
+                return
             header=[]
             text='#data_header'
             header.append(text)
