@@ -6,10 +6,10 @@ Created on Wed May 18 16:19:18 2022
 @author: tzework
 """
 import numpy as np
-from tkinter import Frame, Tk, Button, Label, SUNKEN, StringVar, IntVar, Scrollbar, Listbox
+from tkinter import Frame, Button, Label, SUNKEN, StringVar, IntVar
 import os
 from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
-from RW_data.RW_files import Files_RW
+from RW_data.RW_files import Read_from, Write_to
 from Figure.Figure import FigureE60
 from Data.Process import Process_data
 from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame, FigureFrame
@@ -29,19 +29,16 @@ class E60_tot_RT(AppFrame):
         self.init_ctr_frame()
         self.init_tr_frame()
         self.init_sideframe()
-        try:
-            tmp=Files_RW().check_E60_ini(self.scriptdir,self.ini_name,self.split)
-            self.filedir=tmp.filedir
-            self.savedir=tmp.savedir
-            self.refdir=tmp.refdir
-            if tmp.reffile!='':
-                self.reffile.set(tmp.reffile)
-                self.process_reference_file(os.path.join(tmp.refdir,tmp.reffile))
-        except:
-            self.filedir='Documents'
-            self.refdir='Documents'
-            self.savedir='Documents'
-            self.write_to_ini()
+        self.ini=Read_from.ini_inst(__file__)
+        if self.ini['error']:
+            self.ini={}
+            self.ini['save_file_path']='Document'
+            self.ini['ref_file_path']='Documents'
+            self.ini['load_file_path']='Documents'
+        else:
+            self.ini.pop("error")
+            self.reffile.set(self.ini['ref_file_name'])
+            self.process_reference_file(os.path.join(self.ini['ref_file_path'],self.ini['ref_file_name']))
     
     def __str__(self):
         return 'E60_data_process'
@@ -71,7 +68,7 @@ class E60_tot_RT(AppFrame):
         write.append(f'load_file_path{self.split}{self.filedir}')
         write.append(f'save_file_path{self.split}{self.savedir}')
         
-        Files_RW().write_to_file(self.scriptdir,self.ini_name,write)
+        #Files_RW().write_to_file(self.scriptdir,self.ini_name,write)
         
     def init_frames(self):    
         #for the buttons and file list
@@ -141,19 +138,19 @@ class E60_tot_RT(AppFrame):
         Label(self.sideframe, font='Courier',width=24, wraplength=240,justify='left',relief=SUNKEN, textvariable=self.reffile,anchor='w').grid(row=rowcount,column=1,columnspan=2)
         rowcount+=1
         Label(self.sideframe, font='Courier',width=24,text='Loaded files:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
-        rowcount+=1
-        self.xscrollbar=Scrollbar(self.sideframe,orient='horizontal')
-        self.xscrollbar.grid(row = rowcount, column = 1, columnspan=2, sticky='EW')
-        rowcount+=1
-        self.listbox=Listbox(self.sideframe, font='Courier', selectbackground='red', selectmode='extended',width=24, height=7)
-        self.listbox.grid(row = rowcount, column = 1,columnspan=2,rowspan=5)
-        self.scrollbar=Scrollbar(self.sideframe)
-        self.scrollbar.grid(row = rowcount, column = 3, rowspan=5, sticky='NS')
-        self.listbox.config(yscrollcommand = self.scrollbar.set)
-        self.scrollbar.config(command = self.listbox.yview)
-        #now configure xscrollbar
-        self.listbox.config(xscrollcommand = self.xscrollbar.set)
-        self.xscrollbar.config(command = self.listbox.xview)
+        #rowcount+=1
+        #self.xscrollbar=Scrollbar(self.sideframe,orient='horizontal')
+        #self.xscrollbar.grid(row = rowcount, column = 1, columnspan=2, sticky='EW')
+        #rowcount+=1
+        #self.listbox=Listbox(self.sideframe, font='Courier', selectbackground='red', selectmode='extended',width=24, height=7)
+        #self.listbox.grid(row = rowcount, column = 1,columnspan=2,rowspan=5)
+        #self.scrollbar=Scrollbar(self.sideframe)
+        #self.scrollbar.grid(row = rowcount, column = 3, rowspan=5, sticky='NS')
+        #self.listbox.config(yscrollcommand = self.scrollbar.set)
+        #self.scrollbar.config(command = self.listbox.yview)
+        ##now configure xscrollbar
+        #self.listbox.config(xscrollcommand = self.xscrollbar.set)
+        #self.xscrollbar.config(command = self.listbox.xview)
     
     
     #IHTM type of file should be here
@@ -185,7 +182,7 @@ class E60_tot_RT(AppFrame):
             init_file=os.path.splitext(self.raw.basename[0])[0]
             filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=f'{init_file}.dtsp')
             if filename:
-                Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
+#                Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
                 self.savedir=os.path.dirname(filename)
                 self.write_to_ini()
     
@@ -213,12 +210,13 @@ class E60_tot_RT(AppFrame):
             init_file=init_file.replace("_R","_1-R")
             filename = asksaveasfilename(title="Select the folder to save the processed data.", initialdir=self.savedir,filetypes=[("E60 tab sep file","*.dtsp")],initialfile=f'{init_file}.dtsp')
             if filename:
-                Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
+#                Files_RW().write_header_data(os.path.dirname(filename),os.path.basename(filename),header,data,fmtlist)
                 self.savedir=os.path.dirname(filename)
                 self.write_to_ini()
             
     def process_reference_file(self,filename):
-        tmp=Files_RW().load_reference_TMM(filename)
+        tmp=Read_from.ihtm(filename)
+        print(tmp)
         if tmp.error!='':
             self.reffile.set('')
             #self.turn_off_ref_switches()
