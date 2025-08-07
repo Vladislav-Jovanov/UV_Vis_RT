@@ -10,3 +10,6 @@
 [submodule "Figures"]
 	path = Figures
 	url = https://github.com/Killberos-Tze/Figures.git
+[submodule "DataProcess"]
+	path = DataProcess
+	url = https://github.com/Killberos-Tze/DataProcess.git

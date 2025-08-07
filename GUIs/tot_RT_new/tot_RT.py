@@ -11,12 +11,10 @@ import os
 from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
 from RW_data.RW_files import Read_from, Write_to
 from Figure.Figure import FigureE60
-from Data.Process import Process_data
+#from DataProcess import convert_units
 from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame, FigureFrame
 
-#ax.set_yscale('log')
-class container():
-    pass
+
 
 class E60_tot_RT(AppFrame):
     def __init__(self,**kwargs):
@@ -35,40 +33,29 @@ class E60_tot_RT(AppFrame):
             self.ini['save_file_path']='Document'
             self.ini['ref_file_path']='Documents'
             self.ini['load_file_path']='Documents'
+            Write_to.ini_inst_proj(__file__,self.ini)
         else:
             self.ini.pop("error")
-            self.reffile.set(self.ini['ref_file_name'])
-            self.process_reference_file(os.path.join(self.ini['ref_file_path'],self.ini['ref_file_name']))
+            if 'ref_file_name' in self.ini and 'ref_file_path' in self.ini:
+                self.reffile.set(self.ini['ref_file_name'])
+                self.process_reference_file(os.path.join(self.ini['ref_file_path'],self.ini['ref_file_name']))
     
     def __str__(self):
         return 'E60_data_process'
     
         
     def init_variables(self):
-        self.split=':='
+        self.ini={}
         self.scriptdir=os.path.dirname(__file__)#path of this __file__ not the __main__
-        self.ini_name=os.path.basename(__file__).replace(os.path.basename(__file__).split('.')[-1],'ini')
         self.reffile=StringVar()
         self.reffile.set('')
         self.errormsg=StringVar()
         self.errormsg.set('')#to display messages
-        self.raw=container()
-        self.raw.filename=[]
-        self.raw.basename=[]
-        self.raw.data=[]
-        self.avgdata=container()
+        self.raw={}
         self.listboxwidth=24
         self.pressnames=['ref','data','avg']
         self.pressbuttons={}
-    
-    def write_to_ini(self):
-        write=[]
-        write.append(f'reference_path{self.split}{self.refdir}')
-        write.append(f'reference_file{self.split}{self.reffile.get()}')
-        write.append(f'load_file_path{self.split}{self.filedir}')
-        write.append(f'save_file_path{self.split}{self.savedir}')
-        
-        #Files_RW().write_to_file(self.scriptdir,self.ini_name,write)
+
         
     def init_frames(self):    
         #for the buttons and file list
@@ -216,19 +203,28 @@ class E60_tot_RT(AppFrame):
             
     def process_reference_file(self,filename):
         tmp=Read_from.ihtm(filename)
-        print(tmp)
-        if tmp.error!='':
+        if tmp['error']!='':
             self.reffile.set('')
             #self.turn_off_ref_switches()
             self.pressbuttons['ref'].disable_press()
             self.pressbuttons['use'].disable_press()
             self.pressbuttons['ref'].change_state('off')
             self.pressbuttons['use'].change_state('off')
-            self.errormsg.set(tmp.error)
+            self.errormsg.set(tmp['error'])
         else:
             self.reference=tmp
+            self.reference['#data_table']=self.reference['#data_table'][:,0:2]#to take only wavelength and reflectance
+            for idx in range(0,self.reference['#data_summary']['tot_col']):
+                if idx>1:
+                    self.reference['#data_summary'].pop(f'y1_{idx}_name')
+                    self.reference['#data_summary'].pop(f'y1_{idx}_col')
+                    self.reference['#data_summary'].pop(f'y1_{idx}_unit')
+            self.reference['#data_summary']['tot_col']=2
+            self.reference['#data_summary']['y1_1_name']='Reflectance'
             self.reffile.set(os.path.basename(filename))
-            Process_data().convert_units(self.reference)#converts into nm via mutuable property
+            print(self.reference['#data_summary'])
+            A=self.reference
+            #self.reference['#data_table'][:,0],self.reference['#data_summary']['x1_unit']=Process_data().convert_units(self.reference['#data_table'][:,0],self.reference['#data_summary']['x1_unit'])
             self.pressbuttons['ref'].enable_press()
             self.pressbuttons['use'].enable_press()
         
@@ -252,12 +248,12 @@ class E60_tot_RT(AppFrame):
     
     def process_raw_file(self,filename):
         out=0
-        tmp=Files_RW().load_dsp(filename)
+        tmp=Read_from.ihtm(filename)
         if tmp.error!='':
             self.errormsg.set(tmp.error)
         elif not self.raw.data:
             if tmp.type in ['Reflectance','Transmittance','Absorbance']: #I only allow loading of %R files 
-                Process_data().convert_units(tmp)#converts into nm
+#                Process_data().convert_units(tmp)#converts into nm
                 self.raw.data.append(tmp)
                 self.raw.filename.append(filename)
                 self.raw.basename.append(os.path.basename(filename))
@@ -265,7 +261,7 @@ class E60_tot_RT(AppFrame):
                 out=1
         elif self.raw.data:
             if tmp.type==self.raw.data[-1].type: #I only allow loading of %R files
-                Process_data().convert_units(tmp)#converts into nm
+ #               Process_data().convert_units(tmp)#converts into nm
                 self.raw.data.append(tmp)
                 self.raw.filename.append(filename)
                 self.raw.basename.append(os.path.basename(filename))
