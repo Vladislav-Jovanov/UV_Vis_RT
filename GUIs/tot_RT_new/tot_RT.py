@@ -10,136 +10,150 @@ from tkinter import Frame, Button, Label, SUNKEN, StringVar, IntVar
 import os
 from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
 from RW_data.RW_files import Read_from, Write_to
-from Figure.Figure import FigureE60
+from Figures.Figures import FigureXY2
 #from DataProcess import convert_units
-from tkWindget.tkWindget import Rotate, OnOffButton, AppFrame, FigureFrame
+from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile
 
 
 
 class E60_tot_RT(AppFrame):
     def __init__(self,**kwargs):
-        super().__init__(**kwargs,appgeometry=(900, 540, 25, 25))
+        super().__init__(**kwargs,file=__file__,appgeometry=(900, 540, 25, 25))
         self.init_variables()
         self.init_frames()
-        self.init_mainframe()
-        self.init_ctl_frame()
-        self.init_tl_frame()
-        self.init_ctr_frame()
-        self.init_tr_frame()
-        self.init_sideframe()
-        self.ini=Read_from.ini_inst(__file__)
-        if self.ini['error']:
-            self.ini={}
-            self.ini['save_file_path']='Document'
-            self.ini['ref_file_path']='Documents'
-            self.ini['load_file_path']='Documents'
-            Write_to.ini_inst_proj(__file__,self.ini)
-        else:
-            self.ini.pop("error")
-            if 'ref_file_name' in self.ini and 'ref_file_path' in self.ini:
-                self.reffile.set(self.ini['ref_file_name'])
-                self.process_reference_file(os.path.join(self.ini['ref_file_path'],self.ini['ref_file_name']))
-    
-    def __str__(self):
-        return 'E60_data_process'
-    
+        self.init_loadframe()
+        self.init_displayframe()
+        self.init_dataframe()
         
+        #if 'ref_file_name' in self.ini and 'ref_file_path' in self.ini:
+        #    self.reffile.set(self.ini['ref_file_name'])
+        #    self.process_reference_file(os.path.join(self.ini['ref_file_path'],self.ini['ref_file_name']))
+
+    def __str__(self):
+        return 'E60_process_data'
+    
+            
+    def placeholder(self):
+        pass    
+    
     def init_variables(self):
-        self.ini={}
-        self.scriptdir=os.path.dirname(__file__)#path of this __file__ not the __main__
-        self.reffile=StringVar()
-        self.reffile.set('')
-        self.errormsg=StringVar()
-        self.errormsg.set('')#to display messages
-        self.raw={}
-        self.listboxwidth=24
-        self.pressnames=['ref','data','avg']
-        self.pressbuttons={}
+        self.scriptdir=os.path.dirname(__file__)
+        self.display_control={}
+        self.data_buttons={}
+        self.movavg_list=[0,1,3,5,7]
 
         
     def init_frames(self):    
         #for the buttons and file list
-        self.sideframe = Frame(self.frameroot)
-        self.sideframe.grid(column=0,row=0,rowspan=3)
-        self.sideframe.columnconfigure(0, weight = 1)
-        self.sideframe.rowconfigure(0, weight = 1)
+        self.controlframe = Frame(self.frameroot)
+        self.controlframe.grid(column=0,row=0)
         
-        #for the label text avg points
-        self.tl_frame=Frame(self.frameroot)
-        self.tl_frame.grid(column=1,row=0)
-        self.tl_frame.columnconfigure(0, weight = 1)
-        self.tl_frame.rowconfigure(0, weight = 1)
+        self.figframe=FigureFrame(parent=self.frameroot,figclass=FigureXY2)
+        self.figframe.grid(column=1,row=0)
         
-        #for the label text what to show
-        self.tr_frame=Frame(self.frameroot)
-        self.tr_frame.grid(column=2,row=0,sticky='W')
-        self.tr_frame.columnconfigure(0, weight = 1)
-        self.tr_frame.rowconfigure(0, weight = 1)
-        
-        #for the graph and toolbar
-        self.mainframe = Frame(self.frameroot)
-        #self.mainframe.pack(pady = (50,50), padx = (50,50))
-        self.mainframe.grid(column=1,row=2, columnspan=2)
-        self.mainframe.columnconfigure(0, weight = 1)
-        self.mainframe.rowconfigure(0, weight = 1)
-        
-        #for the avg points control
-        self.ctl_frame=Frame(self.frameroot)
-        self.ctl_frame.grid(column=1,row=1)
-        self.ctl_frame.columnconfigure(0, weight = 1)
-        self.ctl_frame.rowconfigure(0, weight = 1)
+        #for load file
+        self.loadframe=Frame(self.controlframe)#,background='aquamarine2'
+        self.loadframe.grid(column=0,row=0,sticky='E')
         
         #for the display control
-        self.ctr_frame=Frame(self.frameroot)
-        self.ctr_frame.grid(column=2,row=1)
-        self.ctr_frame.columnconfigure(0, weight = 1)
-        self.ctr_frame.rowconfigure(0, weight = 1)
+        self.displayframe=Frame(self.controlframe)
+        self.displayframe.grid(column=0,row=1,sticky='E')
+        #self.ctr_frame.columnconfigure(0, weight = 1)
+        #self.ctr_frame.rowconfigure(0, weight = 1)
+        #for the data manipulatoin
+        self.dataframe=Frame(self.controlframe)#,background='bisque2'
+        self.dataframe.grid(column=0,row=2,sticky='E')
         
-    def placeholder(self):
+    def init_loadframe(self):
+        rowcount=0
+        Label(self.loadframe,text='Load files',relief=SUNKEN, borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=1,sticky='E')
+        rowcount+=1
+        self.load_abs_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, path='ref_file_path', write_ini=self.write_ini,  text='Load absolute\nreference', filetypes=[('Ref file','*.txt *.tmm' )])
+        self.load_abs_ref.add_action(self.load_ref_action)
+        self.load_abs_ref.grid(row=rowcount,column=1,sticky='E')
+        rowcount+=1
+        tmp=CheckBox(parent=self.loadframe,text='Use absolute reference',commandon=self.load_abs_ref.enable,commandoff=self.load_abs_ref.disable)
+        tmp.change_state('on')
+        tmp.grid(row=rowcount, column=1,sticky='E')
+        
+        rowcount+=1
+        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=[('E60 file','*.dsp' )])
+        self.load_rel_ref.grid(row=rowcount,column=1,sticky='E')
+        rowcount+=1
+        tmp=CheckBox(parent=self.loadframe,text='Use measured reference',commandon=self.load_rel_ref.enable,commandoff=self.load_rel_ref.disable)
+        tmp.change_state('on')
+        tmp.grid(row=rowcount, column=1,sticky='E')
+        
+        rowcount+=1
+        self.load_measured=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\ndata', filetypes=[('E60 file','*.dsp' )])
+        self.load_measured.grid(row=rowcount,column=1,sticky='E')
+        
+    def init_displayframe(self):
+        rowcount=0
+        Label(self.displayframe,text='Display control',relief=SUNKEN, borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=1,columnspan=3,sticky='E')
+        rowcount+=1
+        self.displayall=Button(self.displayframe,text='Select all',command=self.select_display)
+        self.displayall.grid(row=rowcount,column=1)
+        self.displaynone=Button(self.displayframe,text='Select none',command=self.deselect_display)
+        self.displaynone.grid(row=rowcount,column=3)
+        Label(self.displayframe,width=1).grid(column=2,row=rowcount,rowspan=4)
+        rowcount+=1
+        
+        self.display_control['ref_abs']=CheckBox(parent=self.displayframe,text='Absolute reference',command=self.checkbox_action)
+        self.display_control['ref_abs'].grid(row=rowcount,column=1,sticky='W')
+        self.display_control['data']=CheckBox(parent=self.displayframe,text='Data')
+        self.display_control['data'].grid(row=rowcount,column=3,sticky='W')
+        rowcount+=1
+        self.display_control['ref_raw']=CheckBox(parent=self.displayframe,text='Measured reference')
+        self.display_control['ref_raw'].grid(row=rowcount,column=1,sticky='W')
+        self.display_control['1-data']=CheckBox(parent=self.displayframe,text='1-Data')
+        self.display_control['1-data'].grid(row=rowcount,column=3,sticky='W')
+        rowcount+=1
+        
+        self.display_control['data_raw']=CheckBox(parent=self.displayframe,text='Measured data')
+        self.display_control['data_raw'].grid(row=rowcount,column=1,sticky='W')
+        self.display_control['log_data']=CheckBox(parent=self.displayframe,text='Log(Data)')
+        self.display_control['log_data'].grid(row=rowcount,column=3,sticky='W')
+        
+      
+    def init_dataframe(self):
+        rowcount=0
+        Label(self.dataframe,text='Data control',relief=SUNKEN, borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=0,columnspan=2,sticky='E')
+        rowcount+=1
+        Label(self.dataframe, text='Points to smooth:',anchor='w').grid(row=rowcount, column=0,sticky='W')
+        self.data_buttons['save']=Button(self.dataframe, text='Save data')
+        self.data_buttons['save'].grid(column=1,row=rowcount,rowspan=2,sticky='E')
+        rowcount+=1
+        self.avg_num=Rotate(parent=self.dataframe,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar,command=self.movavg_change)
+        
+        self.avg_num.grid(column=0,row=rowcount,sticky='w')
+        rowcount+=1
+        self.data_buttons['savelog']=Button(self.dataframe, text='Save log(data)')
+        self.data_buttons['savelog'].grid(column=0,row=rowcount,sticky='W')
+        self.data_buttons['save1-data']=Button(self.dataframe, text='Save 1-data')
+        self.data_buttons['save1-data'].grid(column=1,row=rowcount,sticky='E')
+
+    def load_ref_action(self):
+        #self.figframe.plot.plot_loaded_curves([self.load_abs_ref.get_data()],[self.display_control['ref_abs'].get_state()])
+        print(self.load_abs_ref.get_data())
+        print(self.display_control['ref_abs'].get_state())
+        
+    def checkbox_action(self):
+        self.load_ref_action()
+    def movavg_change(self,avg):
+        self.update_avg()
+        #self.plot_all()
+    
+    def update_avg(self):
         pass
     
-    def init_sideframe(self):
-        rowcount=1
-        Label(self.sideframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,columnspan=2)
-        rowcount+=1
-        Button(self.sideframe, text="Open reference\ndata file", command=self.Get_ref_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
-        
-        tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'use_{image}' for image in ['on.png','off.png']],command=self.plot_all)
-        tmp.grid(row=rowcount,column=2)
-        self.pressbuttons['use']=tmp
-        
-        rowcount+=1
-        Button(self.sideframe, text="Open \ndata file(s)", command=self.Get_raw_file,width=12,bg='lightgray').grid(row=rowcount,column=1)
-        Button(self.sideframe, text="Clear selected\ndata", command=self.Remove_loaded,width=12,bg='lightgray').grid(row=rowcount,column=2)
-        rowcount+=1
-        Button(self.sideframe, text="Save\ndata", command=self.save_data,width=12,bg='lightgray').grid(row=rowcount,column=1)
-        Button(self.sideframe, text="Save\n1-R", command=self.save_one_data,width=12,bg='lightgray').grid(row=rowcount,column=2)
-        #tmp=OnOffButton(parent=self.sideframe,imagepath=os.path.join(self.scriptdir,'images'),images=[f'log_{image}' for image in ['on.png','off.png']],command=self.plot_all)
-        #tmp.enable_press()
-        #tmp.grid(row=rowcount,column=2)
-        #self.pressbuttons['log']=tmp
-        
-        rowcount+=1
-        Label(self.sideframe, font='Courier',width=24,text='Reference data:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
-        rowcount+=1
-        Label(self.sideframe, font='Courier',width=24, wraplength=240,justify='left',relief=SUNKEN, textvariable=self.reffile,anchor='w').grid(row=rowcount,column=1,columnspan=2)
-        rowcount+=1
-        Label(self.sideframe, font='Courier',width=24,text='Loaded files:',anchor='w').grid(row=rowcount,column=1,columnspan=2)
-        #rowcount+=1
-        #self.xscrollbar=Scrollbar(self.sideframe,orient='horizontal')
-        #self.xscrollbar.grid(row = rowcount, column = 1, columnspan=2, sticky='EW')
-        #rowcount+=1
-        #self.listbox=Listbox(self.sideframe, font='Courier', selectbackground='red', selectmode='extended',width=24, height=7)
-        #self.listbox.grid(row = rowcount, column = 1,columnspan=2,rowspan=5)
-        #self.scrollbar=Scrollbar(self.sideframe)
-        #self.scrollbar.grid(row = rowcount, column = 3, rowspan=5, sticky='NS')
-        #self.listbox.config(yscrollcommand = self.scrollbar.set)
-        #self.scrollbar.config(command = self.listbox.yview)
-        ##now configure xscrollbar
-        #self.listbox.config(xscrollcommand = self.xscrollbar.set)
-        #self.xscrollbar.config(command = self.listbox.xview)
+    def select_display(self):
+        for key in self.display_control.keys():
+            self.display_control[key].change_state('on')
     
-    
+    def deselect_display(self):
+        for key in self.display_control.keys():
+            self.display_control[key].change_state('off')
     #IHTM type of file should be here
     #comment
     #setup
@@ -311,37 +325,7 @@ class E60_tot_RT(AppFrame):
             self.pressbuttons['data'].change_state('off')
         self.plot_all()
     
-    def init_tr_frame(self):
-        rowcount=1
-        Label(self.tr_frame,font='Courier',width=20,text='Averaging points',background=None).grid(row=rowcount,column=1)
-        
-    def init_ctr_frame(self):
-        rowcount=1
-        self.movavg_list=[0,1,3,5,7]
-        self.movavg=self.movavg_list[0]
-        self.avg_num=Rotate(parent=self.ctr_frame,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar,command=self.movavg_change)
-        self.avg_num.grid(column=1,row=rowcount,sticky='WE')
-        
-    def movavg_change(self,avg):
-        self.errormsg.set('')
-        self.movavg=avg
-        self.plot_all()
     
-    def init_tl_frame(self):
-        rowcount=1
-        Label(self.tl_frame,font='Courier',width=20,text='Control display',background=None).grid(row=rowcount,column=1)
-        
-    def init_ctl_frame(self):
-        rowcount=1
-        columncount=1
-        for idx,item in enumerate(self.pressnames):
-            tmp=OnOffButton(parent=self.ctl_frame,imagepath=os.path.join(self.scriptdir,'images'),images=[f'{self.pressnames[idx]}_{image}' for image in ['on.png','off.png']],command=self.plot_all)
-            tmp.grid(row=rowcount,column=columncount+idx)
-            self.pressbuttons[item]=tmp
-        
-    def init_mainframe(self):
-        self.figure=FigureFrame(parent=self.mainframe,figclass=FigureE60)
-        self.figure.grid(row=1,column=1)
     
         #it should be rewritten because you do not need separate functions in figure class
     def plot_all(self):
