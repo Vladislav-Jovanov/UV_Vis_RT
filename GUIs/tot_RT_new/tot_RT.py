@@ -5,14 +5,12 @@ Created on Wed May 18 16:19:18 2022
 
 @author: tzework
 """
-from numpy import log10
-from tkinter import Frame, Button, Label, RAISED, StringVar, IntVar, DISABLED, NORMAL
-import os
-from tkinter.filedialog import askopenfilename, askopenfilenames, asksaveasfilename
+from numpy import log10, abs
+from tkinter import Frame, Button, Label, RAISED, IntVar, DISABLED, NORMAL
 from RW_data.RW_files import Read_from, Write_to
 from Figures.Figures import FigureXY2
 from DataProcess.DataProcess import convert_unit_IHTM, absolute_reflectance_IHTM, multiply_2col_IHTM, divide_2col_IHTM, average_IHTM, copy_IHTM
-from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile
+from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
 
 
 
@@ -32,14 +30,13 @@ class E60_tot_RT(AppFrame):
         pass    
 
     def init_variables(self):
-        self.scriptdir=os.path.dirname(__file__)
         self.display_control={}
         self.data_buttons={}
         self.movavg_list=[0,1,3,5,7]
         self.data=None
         self.one_minus_data=None
         self.logdata=None
-        self.load_measured=None#needed during init phase
+        self.init=False#needed during init phase
 
     def init_frames(self):    
         #for the buttons and file list
@@ -120,18 +117,18 @@ class E60_tot_RT(AppFrame):
         Label(self.dataframe,text='Data control',relief=RAISED,background='bisque2', borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=0,columnspan=2,sticky='E')
         rowcount+=1
         Label(self.dataframe, text='Points to smooth:',anchor='w').grid(row=rowcount, column=0,sticky='W')
-        self.data_buttons['save']=Button(self.dataframe, text='Save data')
+        self.data_buttons['save']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_data)
         self.data_buttons['save'].config(state=DISABLED)
         self.data_buttons['save'].grid(column=1,row=rowcount,rowspan=2,sticky='E')
         rowcount+=1
-        self.avg_num=Rotate(parent=self.dataframe,direction='horizontal',width=5,choice_list=self.movavg_list,typevar=IntVar,command=self.movavg_change)
+        self.avg_num=Rotate(parent=self.dataframe,direction='horizontal',width=5,choice_list=self.movavg_list,textvariable=IntVar,command=self.movavg_change)
         
         self.avg_num.grid(column=0,row=rowcount,sticky='w')
         rowcount+=1
-        self.data_buttons['savelog']=Button(self.dataframe, text='Save log(data)')
+        self.data_buttons['savelog']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save log(data)', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_log_data)
         self.data_buttons['savelog'].config(state=DISABLED)
         self.data_buttons['savelog'].grid(column=0,row=rowcount,sticky='W')
-        self.data_buttons['save1-data']=Button(self.dataframe, text='Save 1-data')
+        self.data_buttons['save1-data']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save 1-data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_one_minus_data)
         self.data_buttons['save1-data'].config(state=DISABLED)
         self.data_buttons['save1-data'].grid(column=1,row=rowcount,sticky='E')
 
@@ -213,9 +210,6 @@ class E60_tot_RT(AppFrame):
                 if self.load_rel_check.get_state()=='off':
                     self.load_rel_check.enable_press()
                     self.load_rel_check.execute_press()
-                self.display_control['1-data'].enable_press()
-                self.data_buttons['save1-data'].config(state=NORMAL)
-                self.data_buttons['savelog'].config(state=DISABLED)
             else:
                 if self.load_abs_check.get_state()=='on':
                     self.load_abs_check.enable_press()
@@ -223,12 +217,18 @@ class E60_tot_RT(AppFrame):
                 if self.load_rel_check.get_state()=='on':
                     self.load_rel_check.enable_press()
                     self.load_rel_check.execute_press()
-                self.display_control['log_data'].enable_press()
-                self.data_buttons['save1-data'].config(state=DISABLED)
-                self.data_buttons['savelog'].config(state=NORMAL)
+            #since many users will forget to switch to transmittance
+            self.data_buttons['save1-data'].config(state=NORMAL)
+            self.data_buttons['savelog'].config(state=NORMAL)
             self.data_buttons['save'].config(state=NORMAL)
+            self.display_control['1-data'].enable_press()
+            self.display_control['log_data'].enable_press()
             self.display_control['data_raw'].enable_press()
             self.display_control['data'].enable_press()
+            filename=self.load_measured.labelbutton.get_var()
+            self.data_buttons['save'].add_filename(filename[0:filename.index('.dsp')])
+            self.data_buttons['save1-data'].add_filename(filename[0:filename.index('.dsp')])
+            self.data_buttons['savelog'].add_filename(filename[0:filename.index('.dsp')])
         else:
             self.data_buttons['save1-data'].config(state=DISABLED)
             self.data_buttons['save'].config(state=DISABLED)
@@ -274,27 +274,29 @@ class E60_tot_RT(AppFrame):
             self.one_minus_data=None
             self.logdata=None
         else:
-            if D['#data_summary']['y1_name']=='Reflectance':
-                self.one_minus_data=copy_IHTM(self.data)
-                self.one_minus_data['#data_table'][:,1]=1-self.one_minus_data['#data_table'][:,1]
-                self.one_minus_data['#data_summary']['y1_label']=f"1-{self.one_minus_data['#data_summary']['y1_label']}"
-            if D['#data_summary']['y1_name']=='Tramittance':
-                self.logdata=copy_IHTM(self.data)
-                convert_unit_IHTM(self.logdata,'c','y1')
-                self.logdata['#data_table'][:,1]=2-log10(self.log['#data_table'][:,1])
-                self.logdata['#data_summary']['y1_label']="A<->T"
+            self.data['#data_summary']['smooth_points']=self.avg_num.get_var()
+            #since MB keeps forgetting to switch to reflectance
+            #if D['#data_summary']['y1_name']=='Reflectance':
+            self.one_minus_data=copy_IHTM(self.data)
+            self.one_minus_data['#data_table'][:,1]=1-self.one_minus_data['#data_table'][:,1]
+            self.one_minus_data['#data_summary']['y1_label']=f"1-{self.one_minus_data['#data_summary']['y1_label']}"
+            #if D['#data_summary']['y1_name']=='Tramittance':
+            self.logdata=copy_IHTM(self.data)
+            convert_unit_IHTM(self.logdata,'c','y1')
+            self.logdata['#data_table'][:,1]=2-log10(abs(self.logdata['#data_table'][:,1]))
+            self.logdata['#data_summary']['y1_label']="A<->T"
 
-    def save_data(self):
-        pass
+    def save_data(self,filename):
+        Write_to.data(filename,self.data)
 
-    def save_one_minus_data(self):
-        pass
+    def save_one_minus_data(self,filename):
+        Write_to.data(filename,self.one_minus_data)
 
-    def save_log_data(self):
-        pass
+    def save_log_data(self,filename):
+        Write_to.data(filename,self.logdata)
 
     def main(self):
-        if self.load_measured!=None:#needed during init phase
+        if self.init==True:#needed during init phase
             self.calculate_data()
             tmp={}
             tmp['ref_abs']=self.load_abs_ref.get_data()
@@ -302,6 +304,7 @@ class E60_tot_RT(AppFrame):
             tmp['data_raw']=self.load_measured.get_data()
             tmp['data']=self.data
             tmp['1-data']=self.one_minus_data
-            tmp['logdata']=self.logdata
+            tmp['log_data']=self.logdata
             self.figframe.plot.plot_xy_curves(tmp,self.display_control)
-            
+        if self.init==False:
+            self.init=True
