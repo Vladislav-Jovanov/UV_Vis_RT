@@ -19,7 +19,7 @@ from tkinter import Frame, StringVar, Label, Button, SUNKEN, OptionMenu, DoubleV
 
 class calc_A(AppFrame):
     def __init__(self,**kwargs):
-        super().__init__(**kwargs,appgeometry=(800, 650, 25, 25))
+        super().__init__(**kwargs,file=__file__,appgeometry=(800, 650, 25, 25))
         self.init_frames()
         self.init_variables()
         self.init_commandframe()
