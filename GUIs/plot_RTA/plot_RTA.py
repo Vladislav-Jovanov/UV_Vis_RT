@@ -195,9 +195,9 @@ class plot_RTA(AppFrame):
         
     def init_tlmain(self):
         Label(self.tlmain,text='Resize the y-scale:  ').grid(column=0,row=0,sticky='W')
-        self.y_scale=Rotate(parent=self.tlmain,direction='horizontal',width=5,choice_list=[100,150,200,250,300,50],typevar=IntVar,command=self.change_scale)
+        self.y_scale=Rotate(parent=self.tlmain,direction='horizontal',width=5,choice_list=[100,150,200,250,300,50],textvariable=IntVar,command=self.change_scale)
         self.y_scale.grid(column=1, row=0, sticky='E')
-        self.figure.plot.ax.set_ylim(0,self.y_scale.choice.get()+3)
+        self.figure.plot.ax.set_ylim(0,self.y_scale.get_var()+3)
         
     def change_scale(self,val):
         self.figure.plot.ax.set_ylim(0,val+3)
@@ -249,7 +249,7 @@ class plot_RTA(AppFrame):
                 
         
         self.figure.plot.ax.set_xlim(xmin,xmax)
-        self.figure.plot.ax.set_ylim(0,self.y_scale.choice.get()+3)
+        self.figure.plot.ax.set_ylim(0,self.y_scale.get_var()+3)
         
         
         self.figure.canvas.draw()    

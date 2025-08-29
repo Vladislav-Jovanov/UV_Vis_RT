@@ -274,7 +274,6 @@ class E60_tot_RT(AppFrame):
             self.one_minus_data=None
             self.logdata=None
         else:
-            self.data['#data_summary']['smooth_points']=self.avg_num.get_var()
             #since MB keeps forgetting to switch to reflectance
             #if D['#data_summary']['y1_name']=='Reflectance':
             self.one_minus_data=copy_IHTM(self.data)
