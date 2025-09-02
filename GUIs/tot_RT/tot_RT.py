@@ -304,6 +304,6 @@ class E60_tot_RT(AppFrame):
             tmp['data']=self.data
             tmp['1-data']=self.one_minus_data
             tmp['log_data']=self.logdata
-            self.figframe.plot.plot_xy_curves(tmp,self.display_control)
+            self.figframe.plot.plot_xy_dict(tmp,self.display_control)
         if self.init==False:
             self.init=True
