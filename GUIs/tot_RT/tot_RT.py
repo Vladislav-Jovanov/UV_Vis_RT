@@ -282,7 +282,7 @@ class E60_tot_RT(AppFrame):
             #if D['#data_summary']['y1_name']=='Tramittance':
             self.logdata=copy_IHTM(self.data)
             convert_unit_IHTM(self.logdata,'c','y1')
-            self.logdata['#data_table'][:,1]=2-log10(abs(self.logdata['#data_table'][:,1]))
+            self.logdata['#data_table'][:,1]=2-log10(abs(self.logdata['#data_table'][:,1])+1e-9)
             self.logdata['#data_summary']['y1_label']="A<->T"
 
     def save_data(self,filename):
