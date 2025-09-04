@@ -61,11 +61,13 @@ class calc_A(AppFrame):
         if tmp!=None and 'T0' in filename:
             self.reflectance.reset()
             self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename))
-            self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0')))
+            if os.path.exists(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0'))):
+                self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0')))
         elif tmp!=None and 'R0' in filename:
-            self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0')))
+            if os.path.exists(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0'))):
+                self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0')))
         elif tmp!=None and tmp['#data_summary']['y1_name']=='Reflectance':
-            self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename))
+            pass
         else:
             self.reflectance.reset()
         self.main()
@@ -76,11 +78,13 @@ class calc_A(AppFrame):
         if tmp!=None and 'R0' in filename:
             self.transmittance.reset()
             self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename))
-            self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0')))
+            if os.path.exists(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0'))):
+                self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('R0','T0')))
         elif tmp!=None and 'T0' in filename:
-            self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0')))
+            if os.path.exists(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0'))):
+                self.reflectance._load_data(os.path.join(self.ini['load_file_path'],filename.replace('T0','R0')))
         elif tmp!=None and tmp['#data_summary']['y1_name']=='Transmittance':
-            self.transmittance._load_data(os.path.join(self.ini['load_file_path'],filename))
+            pass
         else:
             self.transmittance.reset()
         self.main()
@@ -106,6 +110,7 @@ class calc_A(AppFrame):
         self.plot()
 
     def plot(self):
-        R=self.reflectance.get_data()
-        T=self.transmittance.get_data()
-        self.figure.plot.plot_absorbance(R,T,self.data)
+        if self.data!=None:
+            R=self.reflectance.get_data()
+            T=self.transmittance.get_data()
+            self.figure.plot.plot_absorbance(R,T,self.data)
