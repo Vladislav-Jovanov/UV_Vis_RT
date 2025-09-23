@@ -16,7 +16,7 @@ class plot_RTA(AppFrame):
     def __init__(self,**kwargs):
         super().__init__(**kwargs,file=__file__,appgeometry=(900, 550, 25, 25))
         self._init_frames()
-        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=[('E60 files','*.dsp *.dtsp')])
+        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=[('UV_Vis files','*.dsp *.dtsp'),('E60 files','*.dsp'),('IHTM UV_Vis','*.dtsp')])
         self.multiple_load.add_action(self.plot_stuff)
         self.multiple_load.grid(row=0,column=0)
         
