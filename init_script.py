@@ -32,3 +32,4 @@ if psys()=="Linux":
         with open(desktop,'w') as f:
             for line in linuxtext:
                 savetxt(f, [line], newline='\n', fmt='%s')
+        system('chmod +x desktop')
