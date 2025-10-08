@@ -108,7 +108,7 @@ class E60_tot_RT(AppFrame):
         self.display_control['data_raw']=CheckBox(parent=self.displayframe,text='Measured data',command=self.main)
         self.display_control['data_raw'].disable_press()
         self.display_control['data_raw'].grid(row=rowcount,column=1,sticky='W')
-        self.display_control['log_data']=CheckBox(parent=self.displayframe,text='Log(Data)',command=self.main)
+        self.display_control['log_data']=CheckBox(parent=self.displayframe,text='log(Data)',command=self.main)
         self.display_control['log_data'].disable_press()
         self.display_control['log_data'].grid(row=rowcount,column=3,sticky='W')
 
@@ -117,7 +117,7 @@ class E60_tot_RT(AppFrame):
         Label(self.dataframe,text='Data control',relief=RAISED,background='bisque2', borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=0,columnspan=2,sticky='E')
         rowcount+=1
         Label(self.dataframe, text='Points to smooth:',anchor='w').grid(row=rowcount, column=0,sticky='W')
-        self.data_buttons['save']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_data)
+        self.data_buttons['save']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save Data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_data)
         self.data_buttons['save'].config(state=DISABLED)
         self.data_buttons['save'].grid(column=1,row=rowcount,rowspan=2,sticky='E')
         rowcount+=1
@@ -125,10 +125,10 @@ class E60_tot_RT(AppFrame):
         
         self.avg_num.grid(column=0,row=rowcount,sticky='w')
         rowcount+=1
-        self.data_buttons['savelog']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save A<->T', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_log_data)
+        self.data_buttons['savelog']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save log(Data)', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_log_data)
         self.data_buttons['savelog'].config(state=DISABLED)
         self.data_buttons['savelog'].grid(column=0,row=rowcount,sticky='W')
-        self.data_buttons['save1-data']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save 1-data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_one_minus_data)
+        self.data_buttons['save1-data']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save 1-Data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_one_minus_data)
         self.data_buttons['save1-data'].config(state=DISABLED)
         self.data_buttons['save1-data'].grid(column=1,row=rowcount,sticky='E')
 
@@ -227,8 +227,8 @@ class E60_tot_RT(AppFrame):
             self.display_control['data'].enable_press()
             filename=self.load_measured.labelbutton.get_var()
             self.data_buttons['save'].add_filename(filename[0:filename.index('.dsp')])
-            self.data_buttons['save1-data'].add_filename(filename[0:filename.index('.dsp')])
-            self.data_buttons['savelog'].add_filename(filename[0:filename.index('.dsp')])
+            self.data_buttons['save1-data'].add_filename(filename[0:filename.index('.dsp')].replace('R0','1-R0'))
+            self.data_buttons['savelog'].add_filename(filename[0:filename.index('.dsp')].replace('T0','T->A0'))
         else:
             self.data_buttons['save1-data'].config(state=DISABLED)
             self.data_buttons['save'].config(state=DISABLED)
@@ -278,12 +278,12 @@ class E60_tot_RT(AppFrame):
             #if D['#data_summary']['y1_name']=='Reflectance':
             self.one_minus_data=copy_IHTM(self.data)
             self.one_minus_data['#data_table'][:,1]=1-self.one_minus_data['#data_table'][:,1]
-            self.one_minus_data['#data_summary']['y1_label']=f"1-{self.one_minus_data['#data_summary']['y1_label']}"
+            self.one_minus_data['#data_summary']['y1_label']=f"{self.one_minus_data['#data_summary']['y1_label']}".replace('R0','1-R0')
             #if D['#data_summary']['y1_name']=='Tramittance':
             self.logdata=copy_IHTM(self.data)
             convert_unit_IHTM(self.logdata,'c','y1')
             self.logdata['#data_table'][:,1]=2-log10(abs(self.logdata['#data_table'][:,1])+1e-9)
-            self.logdata['#data_summary']['y1_label']="A<->T"
+            self.logdata['#data_summary']['y1_label']=f"{self.logdata['#data_summary']['y1_label']}".replace('T0','"T->A0')
 
     def save_data(self,filename):
         Write_to.data(filename,self.data)

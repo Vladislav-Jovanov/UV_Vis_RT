@@ -8,6 +8,7 @@ Created on Wed Sep  3 09:28:41 2025
 
 from os import path, chdir, system
 from numpy import savetxt
+from platform import system as psys
 
 dirname=path.dirname(path.abspath(__file__))
 chdir(dirname)
@@ -18,15 +19,16 @@ for item in ['tkWindget', 'RW_data', 'AppHub', 'DataProcess', 'Figures']:
         system('git checkout main')
 
 basedir=path.dirname(path.abspath(__file__))
-text=['[Desktop Entry]','Encoding=UTF-8','Name=UV_Vis data process','Type=Application',
+linuxtext=['[Desktop Entry]','Encoding=UTF-8','Name=UV_Vis data process','Type=Application',
       'Exec='+ path.join(basedir,'run_app.py')+' %F',
       'Icon='+path.join(basedir,'icons','UV_Vis'),
       'Categories=Development']
 
 user=path.expanduser('~')
 
-desktop=path.join(user,'Desktop','test.desktop')
-if not desktop:
-    with open(desktop,'w') as f:
-        for line in text:
-            savetxt(f, [line], newline='\n', fmt='%s')
+if psys()=="Linux":
+    desktop=path.join(user,'Desktop','UV_Vis_App.desktop')
+    if not path.isfile(desktop):
+        with open(desktop,'w') as f:
+            for line in linuxtext:
+                savetxt(f, [line], newline='\n', fmt='%s')

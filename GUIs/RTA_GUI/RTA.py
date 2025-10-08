@@ -99,8 +99,8 @@ class calc_A(AppFrame):
             self.data=absorbance_IHTM(R,T)
             self.save_data.config(state=NORMAL)
             filename=self.reflectance.labelbutton.get_var()
-            if "R01" in filename:
-                filename=filename.replace('R01','A')
+            if "R0" in filename:
+                filename=filename.replace('R0','A0')
             self.save_data.add_filename(filename[0:filename.index('.d')])
         else:
             self.data=None
