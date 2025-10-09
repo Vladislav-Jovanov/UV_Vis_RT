@@ -19,33 +19,33 @@ if not path.isfile(initfinish):
         if path.isdir(path.join(dirname,item)):
             chdir(path.join(dirname,item))
             system('git checkout main')
+    open(initfinish,'w').close()
 
+if psys()=="Linux":
     linuxtext=['[Desktop Entry]','Encoding=UTF-8','Name=UV_Vis data process','Type=Application',
           'Exec='+ path.join(dirname,'run_app.py')+' %F',
           'Icon='+path.join(dirname,'icons','UV_Vis'),
           'Categories=Development']
-
     user=path.expanduser('~')
+    desktop=path.join(user,'Desktop','UV_Vis_App.desktop')
+    if not path.isfile(desktop):
+        with open(desktop,'w') as f:
+            for line in linuxtext:
+                savetxt(f, [line], newline='\n', fmt='%s')
+        system(f'chmod +x {desktop}')
+if psys()=='Windows':
+    from winshell import shortcut, desktop
+    from sys import executable
 
-    if psys()=="Linux":
-        desktop=path.join(user,'Desktop','UV_Vis_App.desktop')
-        if not path.isfile(desktop):
-            with open(desktop,'w') as f:
-                for line in linuxtext:
-                    savetxt(f, [line], newline='\n', fmt='%s')
-            system(f'chmod +x {desktop}')
-    if psys()=='Windows':
-        import winshell
-        from win32com.client import Dispatch
+    desktop = desktop()
+    shortcut_path=path.join(desktop,"UV_Vis data process.lnk")
+    icon_path = path.join(dirname,'icons','UV_Vis.ico')
 
-        desktop = winshell.desktop()
-        path = path.join(desktop, "UV_Vis data process.lnk")
-        target = "pythonw "+path.join(dirname,'run_app.py')
-        icon = path.join(dirname,'icons','UV_Vis')
+    target_path = executable.replace('python.exe','pythonw.exe')
+    target_script=path.join(dirname,'run_app.py')
 
-        shell = Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(path)
-        shortcut.Targetpath = target
-        shortcut.IconLocation = icon
-        shortcut.save()
-    open(initfinish,'w').close()
+    if not path.isfile(shortcut_path):
+        with shortcut(shortcut_path) as link:
+            link.path=target_path
+            link.arguments=target_script
+            link.icon_location=(icon_path,0)
