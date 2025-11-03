@@ -10,13 +10,13 @@ from tkWindget.tkWindget import AppFrame,FigureFrame,LoadMultipleFiles
 from Figures.Figures import FigureXY2
 from DataProcess.DataProcess import convert_unit_IHTM
 from RW_data.RW_files import Read_from
-
+from common.filetypes import display_stuff
 
 class plot_RTA(AppFrame):
     def __init__(self,**kwargs):
         super().__init__(**kwargs,file=__file__,appgeometry=(900, 550, 25, 25))
         self._init_frames()
-        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=[('UV_Vis files','*.dsp *.dtsp'),('E60 files','*.dsp'),('IHTM UV_Vis','*.dtsp')])
+        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=display_stuff)
         self.multiple_load.add_action(self.plot_stuff)
         self.multiple_load.grid(row=0,column=0)
         
@@ -27,12 +27,12 @@ class plot_RTA(AppFrame):
         self.figframe=FigureFrame(parent=self.frameroot,figclass=FigureXY2,figkwargs={'figsize':(15/2.54,8/2.54),'axsize':[2/15,3/15,7/15,5/8]})
         self.figframe.grid(column=1,row=0)
         
-    def read_data(self,filename):
-        if filename.split('.')[-1]=='dsp':
+    def read_data(self,filename,filetype):
+        if filetype=='E60 files':
             tmp=Read_from.dsp(filename)
             convert_unit_IHTM(tmp,'','y1')
             convert_unit_IHTM(tmp,'n','x1')
-        elif filename.split('.')[-1]=='dtsp':
+        elif filetype=='IHTM E60':
             tmp=Read_from.ihtm(filename)
             convert_unit_IHTM(tmp,'','y1')
         return tmp

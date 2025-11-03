@@ -11,7 +11,7 @@ from RW_data.RW_files import Read_from, Write_to
 from Figures.Figures import FigureXY2
 from DataProcess.DataProcess import convert_unit_IHTM, absolute_reflectance_IHTM, multiply_2col_IHTM, divide_2col_IHTM, average_IHTM, copy_IHTM
 from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
-
+from common.filetypes import raw_process, ref_file
 
 
 class E60_tot_RT(AppFrame):
@@ -58,7 +58,7 @@ class E60_tot_RT(AppFrame):
         rowcount=0
         Label(self.loadframe,text='Load files',relief=RAISED,background='bisque2', borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=1,sticky='E')
         rowcount+=1
-        self.load_abs_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, path='ref_file_path', write_ini=self.write_ini,  text='Load absolute\nreference', filetypes=[('Ref file','*.txt *.tmm' )])
+        self.load_abs_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, path='ref_file_path', write_ini=self.write_ini,  text='Load absolute\nreference', filetypes=ref_file)
         self.load_abs_ref.add_action(self.load_abs_action)
         self.load_abs_ref._action()
         self.load_abs_ref.grid(row=rowcount,column=1,sticky='E')
@@ -67,7 +67,7 @@ class E60_tot_RT(AppFrame):
         self.load_abs_check.change_state('on')
         self.load_abs_check.grid(row=rowcount, column=1,sticky='E')
         rowcount+=1
-        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=[('E60 file','*.dsp' )])
+        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=raw_process)
         self.load_rel_ref.add_action(self.load_rel_action)
         self.load_rel_ref.grid(row=rowcount,column=1,sticky='E')
         rowcount+=1
@@ -75,7 +75,7 @@ class E60_tot_RT(AppFrame):
         self.load_rel_check.change_state('on')
         self.load_rel_check.grid(row=rowcount, column=1,sticky='E')
         rowcount+=1
-        self.load_measured=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\ndata', filetypes=[('E60 file','*.dsp' )])
+        self.load_measured=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\ndata', filetypes=raw_process)
         self.load_measured.add_action(self.load_measured_action)
         self.load_measured.grid(row=rowcount,column=1,sticky='E')
 
