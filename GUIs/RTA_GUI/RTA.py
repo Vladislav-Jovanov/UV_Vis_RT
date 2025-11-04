@@ -12,7 +12,7 @@ from tkWindget.tkWindget import AppFrame, FigureFrame, LoadSingleFile, SaveSingl
 from DataProcess.DataProcess import absorbance_IHTM
 import os
 from tkinter import Frame, StringVar, Label, DISABLED, NORMAL
-from common.filetypes import absorb_calc
+from common.filetypes import IHTM_type
 
 
 
@@ -44,11 +44,11 @@ class calc_A(AppFrame):
         rowcount=0
         Label(self.commandframe, textvariable=self.errormsg, font='Courier', fg='#f00', bg='lightgray',width=24).grid(row = rowcount, column = 1,sticky='EW')
         rowcount+=1
-        self.reflectance=LoadSingleFile(parent=self.commandframe,ini=self.ini, read=Read_from.ihtm, bg='lightblue', path='load_file_path', write_ini=self.write_ini, text='Load reflectance file', filetypes=absorb_calc)
+        self.reflectance=LoadSingleFile(parent=self.commandframe,ini=self.ini, read=Read_from.ihtm, bg='lightblue', path='load_file_path', write_ini=self.write_ini, text='Load reflectance file', filetypes=IHTM_type)
         self.reflectance.add_action(self.action_reflectance)
         self.reflectance.grid(row=rowcount,column=1)
         rowcount+=1
-        self.transmittance=LoadSingleFile(parent=self.commandframe,ini=self.ini, read=Read_from.ihtm, bg='lightgreen', path='load_file_path', write_ini=self.write_ini, text='Load transmittance file', filetypes=absorb_calc)
+        self.transmittance=LoadSingleFile(parent=self.commandframe,ini=self.ini, read=Read_from.ihtm, bg='lightgreen', path='load_file_path', write_ini=self.write_ini, text='Load transmittance file', filetypes=IHTM_type)
         self.transmittance.add_action(self.action_transmittance)
         self.transmittance.grid(row=rowcount,column=1)
         rowcount+=1

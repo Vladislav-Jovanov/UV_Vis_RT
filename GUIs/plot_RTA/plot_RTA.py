@@ -10,13 +10,13 @@ from tkWindget.tkWindget import AppFrame,FigureFrame,LoadMultipleFiles
 from Figures.Figures import FigureXY2
 from DataProcess.DataProcess import convert_unit_IHTM
 from RW_data.RW_files import Read_from
-from common.filetypes import display_stuff
+from common.filetypes import display_type
 
 class plot_RTA(AppFrame):
     def __init__(self,**kwargs):
         super().__init__(**kwargs,file=__file__,appgeometry=(900, 550, 25, 25))
         self._init_frames()
-        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=display_stuff)
+        self.multiple_load=LoadMultipleFiles(parent=self.controlframe, ini=self.ini,write_ini=self.write_ini,read=self.read_data,filetypes=display_type)
         self.multiple_load.add_action(self.plot_stuff)
         self.multiple_load.grid(row=0,column=0)
         
@@ -34,6 +34,9 @@ class plot_RTA(AppFrame):
             convert_unit_IHTM(tmp,'n','x1')
         elif filetype=='IHTM E60':
             tmp=Read_from.ihtm(filename)
+            convert_unit_IHTM(tmp,'','y1')
+        elif filetype=='UniNova':
+            tmp=Read_from.uninova(filename)
             convert_unit_IHTM(tmp,'','y1')
         return tmp
     

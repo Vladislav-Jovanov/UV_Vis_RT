@@ -11,7 +11,7 @@ from RW_data.RW_files import Read_from, Write_to
 from Figures.Figures import FigureXY2
 from DataProcess.DataProcess import convert_unit_IHTM, absolute_reflectance_IHTM, multiply_2col_IHTM, divide_2col_IHTM, average_IHTM, copy_IHTM
 from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
-from common.filetypes import raw_process, ref_file
+from common.filetypes import process_type, ref_type
 
 
 class E60_tot_RT(AppFrame):
@@ -58,7 +58,7 @@ class E60_tot_RT(AppFrame):
         rowcount=0
         Label(self.loadframe,text='Load files',relief=RAISED,background='bisque2', borderwidth=2,width=35,anchor = "e").grid(row=rowcount,column=1,sticky='E')
         rowcount+=1
-        self.load_abs_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, path='ref_file_path', write_ini=self.write_ini,  text='Load absolute\nreference', filetypes=ref_file)
+        self.load_abs_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, path='ref_file_path', write_ini=self.write_ini,  text='Load absolute\nreference', filetypes=ref_type)
         self.load_abs_ref.add_action(self.load_abs_action)
         self.load_abs_ref._action()
         self.load_abs_ref.grid(row=rowcount,column=1,sticky='E')
@@ -67,7 +67,7 @@ class E60_tot_RT(AppFrame):
         self.load_abs_check.change_state('on')
         self.load_abs_check.grid(row=rowcount, column=1,sticky='E')
         rowcount+=1
-        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=raw_process)
+        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=process_type)
         self.load_rel_ref.add_action(self.load_rel_action)
         self.load_rel_ref.grid(row=rowcount,column=1,sticky='E')
         rowcount+=1
@@ -75,7 +75,7 @@ class E60_tot_RT(AppFrame):
         self.load_rel_check.change_state('on')
         self.load_rel_check.grid(row=rowcount, column=1,sticky='E')
         rowcount+=1
-        self.load_measured=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\ndata', filetypes=raw_process)
+        self.load_measured=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=self.read_data, path='load_file_path', write_ini=self.write_ini, text='Load measured\ndata', filetypes=process_type)
         self.load_measured.add_action(self.load_measured_action)
         self.load_measured.grid(row=rowcount,column=1,sticky='E')
 
@@ -131,6 +131,13 @@ class E60_tot_RT(AppFrame):
         self.data_buttons['save1-data']=SaveSingleFile(parent=self.dataframe,ini=self.ini, write_ini=self.write_ini, text='Save 1-Data', filetypes=[('IHTM E60','*.dtsp' )],write=self.save_one_minus_data)
         self.data_buttons['save1-data'].config(state=DISABLED)
         self.data_buttons['save1-data'].grid(column=1,row=rowcount,sticky='E')
+
+    def read_data(self,filename,filetype):
+        if filetype=='E60 files':
+            tmp=Read_from.dsp(filename)
+        elif filetype=='UniNova':
+            tmp=Read_from.uninova(filename)
+        return tmp
 
     def load_rel_action(self):
         tmp=self.load_rel_ref.get_data()
@@ -226,9 +233,13 @@ class E60_tot_RT(AppFrame):
             self.display_control['data_raw'].enable_press()
             self.display_control['data'].enable_press()
             filename=self.load_measured.labelbutton.get_var()
-            self.data_buttons['save'].add_filename(filename[0:filename.index('.dsp')])
-            self.data_buttons['save1-data'].add_filename(filename[0:filename.index('.dsp')].replace('R0','1-R0'))
-            self.data_buttons['savelog'].add_filename(filename[0:filename.index('.dsp')].replace('T0','T->A0'))
+            if self.load_measured.get_filetype()=='E60 files':
+                fend='.dsp'
+            elif self.load_measured.get_filetype()=='UniNova':
+                fend='.csv'
+            self.data_buttons['save'].add_filename(filename[0:filename.index(fend)])
+            self.data_buttons['save1-data'].add_filename(filename[0:filename.index(fend)].replace('R0','1-R0'))
+            self.data_buttons['savelog'].add_filename(filename[0:filename.index(fend)].replace('T0','T->A0'))
         else:
             self.data_buttons['save1-data'].config(state=DISABLED)
             self.data_buttons['save'].config(state=DISABLED)
@@ -242,7 +253,7 @@ class E60_tot_RT(AppFrame):
             self.display_control['data'].disable_press()
             self.display_control['data_raw'].disable_press()
         self.main()
-       
+
     def select_display(self):
         for key in self.display_control.keys():
             if self.display_control[key].is_enabled():
@@ -256,7 +267,7 @@ class E60_tot_RT(AppFrame):
 
     def movavg_change(self,avg):
         self.main()
- 
+
     def calculate_data(self):
         D=self.load_measured.get_data()
         R=self.load_rel_ref.get_data()
@@ -296,6 +307,7 @@ class E60_tot_RT(AppFrame):
     def main(self):
         if self.init==True:#needed during init phase
             self.calculate_data()
+            print(self.data)
             tmp={}
             tmp['ref_abs']=self.load_abs_ref.get_data()
             tmp['ref_raw']=self.load_rel_ref.get_data()
