@@ -307,7 +307,6 @@ class E60_tot_RT(AppFrame):
     def main(self):
         if self.init==True:#needed during init phase
             self.calculate_data()
-            print(self.data)
             tmp={}
             tmp['ref_abs']=self.load_abs_ref.get_data()
             tmp['ref_raw']=self.load_rel_ref.get_data()
