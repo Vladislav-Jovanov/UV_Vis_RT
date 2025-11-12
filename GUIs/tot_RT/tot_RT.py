@@ -67,7 +67,7 @@ class E60_tot_RT(AppFrame):
         self.load_abs_check.change_state('on')
         self.load_abs_check.grid(row=rowcount, column=1,sticky='E')
         rowcount+=1
-        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=Read_from.dsp, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=process_type)
+        self.load_rel_ref=LoadSingleFile(parent=self.loadframe,ini=self.ini, read=self.read_data, path='load_file_path', write_ini=self.write_ini, text='Load measured\nreference', filetypes=process_type)
         self.load_rel_ref.add_action(self.load_rel_action)
         self.load_rel_ref.grid(row=rowcount,column=1,sticky='E')
         rowcount+=1
