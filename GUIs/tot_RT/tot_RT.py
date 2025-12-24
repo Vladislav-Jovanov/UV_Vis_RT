@@ -7,10 +7,10 @@ Created on Wed May 18 16:19:18 2022
 """
 from numpy import log10, abs
 from tkinter import Frame, Button, Label, RAISED, IntVar, DISABLED, NORMAL
-from RW_data.RW_files import Read_from, Write_to
-from Figures.Figures import FigureXY2
-from DataProcess.DataProcess import convert_unit_IHTM, absolute_reflectance_IHTM, multiply_2col_IHTM, divide_2col_IHTM, average_IHTM, copy_IHTM
-from tkWindget.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
+from submodules.RW_files import Read_from, Write_to
+from submodules.Figures import FigureXY2
+from submodules.DataProcess import convert_unit_IHTM, absolute_reflectance_IHTM, multiply_2col_IHTM, divide_2col_IHTM, average_IHTM, copy_IHTM
+from submodules.tkWindget import Rotate, CheckBox, AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
 from common.filetypes import process_type, ref_type
 
 

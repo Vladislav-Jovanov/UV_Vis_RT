@@ -15,7 +15,7 @@ pngicon='UV_Vis.png'
 icoicon='UV_Vis.ico'
 linuxname='UV_Vis_App.desktop'
 scriptname='run_app.py'
-windgetlist=['tkWindget', 'RW_data', 'AppHub', 'DataProcess', 'Figures']
+windgetlist=['submodules']
 
 dirname=path.dirname(path.abspath(__file__))
 initfinish=path.join(dirname,'init_finished.ini')

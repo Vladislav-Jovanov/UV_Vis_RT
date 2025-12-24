@@ -6,10 +6,10 @@ Created on Tue Mar 14 15:00:13 2023
 @author: tze
 """
 
-from RW_data.RW_files import Read_from, Write_to
-from Figures.Figures import FigureLineMap
-from tkWindget.tkWindget import AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
-from DataProcess.DataProcess import absorbance_IHTM
+from submodules.RW_files import Read_from, Write_to
+from submodules.Figures import FigureLineMap
+from submodules.tkWindget import AppFrame, FigureFrame, LoadSingleFile, SaveSingleFile
+from submodules.DataProcess import absorbance_IHTM
 import os
 from tkinter import Frame, StringVar, Label, DISABLED, NORMAL
 from common.filetypes import IHTM_type
